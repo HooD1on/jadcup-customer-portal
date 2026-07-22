@@ -18,7 +18,6 @@ import { mockOrderDetails } from '../../mocks/data';
 import { formatCurrency, formatDate } from '../../lib/format';
 import type { OrderStatus, OrderDetail } from '../../types';
 
-// Timeline step configuration
 const timelineSteps: { status: OrderStatus; label: string; icon: typeof Clock }[] = [
   { status: 'pending', label: 'Order Placed', icon: FileText },
   { status: 'confirmed', label: 'Confirmed', icon: CheckCircle2 },
@@ -40,6 +39,88 @@ const statusIndex: Record<OrderStatus, number> = {
 
 function getActiveStep(status: OrderStatus): number {
   return statusIndex[status] ?? -1;
+}
+
+function HorizontalTimeline({ activeStep }: { activeStep: number }) {
+  return (
+    <div className="flex items-center">
+      {timelineSteps.map((step, i) => {
+        const isComplete = i <= activeStep;
+        const isCurrent = i === activeStep;
+        const Icon = step.icon;
+        return (
+          <div key={step.status} className="flex items-center flex-1 last:flex-none">
+            <div className="flex flex-col items-center relative">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors ${
+                  isComplete
+                    ? 'bg-jade-600 border-jade-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-400'
+                } ${isCurrent ? 'ring-2 ring-jade-200' : ''}`}
+              >
+                <Icon size={14} />
+              </div>
+              <span
+                className={`text-xs mt-1.5 text-center whitespace-nowrap ${
+                  isComplete ? 'text-jade-700 font-medium' : 'text-gray-400'
+                }`}
+              >
+                {step.label}
+              </span>
+            </div>
+            {i < timelineSteps.length - 1 && (
+              <div
+                className={`flex-1 h-0.5 mx-1 ${
+                  i < activeStep ? 'bg-jade-500' : 'bg-gray-200'
+                }`}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function VerticalTimeline({ activeStep }: { activeStep: number }) {
+  return (
+    <div className="flex flex-col">
+      {timelineSteps.map((step, i) => {
+        const isComplete = i <= activeStep;
+        const isCurrent = i === activeStep;
+        const Icon = step.icon;
+        return (
+          <div key={step.status} className="flex items-start">
+            <div className="flex flex-col items-center mr-3">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center border-2 flex-shrink-0 ${
+                  isComplete
+                    ? 'bg-jade-600 border-jade-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-400'
+                } ${isCurrent ? 'ring-2 ring-jade-200' : ''}`}
+              >
+                <Icon size={14} />
+              </div>
+              {i < timelineSteps.length - 1 && (
+                <div
+                  className={`w-0.5 h-6 ${
+                    i < activeStep ? 'bg-jade-500' : 'bg-gray-200'
+                  }`}
+                />
+              )}
+            </div>
+            <span
+              className={`text-sm pt-1.5 ${
+                isComplete ? 'text-jade-700 font-medium' : 'text-gray-400'
+              }`}
+            >
+              {step.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export function OrderDetailPage() {
@@ -65,8 +146,6 @@ export function OrderDetailPage() {
   }
 
   const activeStep = getActiveStep(order.status);
-  const subtotal = order.totalPrice;
-  const gst = order.priceInclGst - order.totalPrice;
 
   return (
     <PageShell>
@@ -91,43 +170,14 @@ export function OrderDetailPage() {
 
       {/* Progress timeline — not shown for cancelled orders */}
       {order.status !== 'cancelled' && (
-        <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 mb-6 overflow-x-auto">
+        <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 mb-6">
           <h2 className="text-sm font-semibold text-gray-900 mb-4">Order Progress</h2>
-          <div className="flex items-center min-w-[500px]">
-            {timelineSteps.map((step, i) => {
-              const isComplete = i <= activeStep;
-              const isCurrent = i === activeStep;
-              const Icon = step.icon;
-              return (
-                <div key={step.status} className="flex items-center flex-1 last:flex-none">
-                  <div className="flex flex-col items-center relative">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors ${
-                        isComplete
-                          ? 'bg-jade-600 border-jade-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-400'
-                      } ${isCurrent ? 'ring-2 ring-jade-200' : ''}`}
-                    >
-                      <Icon size={14} />
-                    </div>
-                    <span
-                      className={`text-[10px] sm:text-xs mt-1.5 text-center whitespace-nowrap ${
-                        isComplete ? 'text-jade-700 font-medium' : 'text-gray-400'
-                      }`}
-                    >
-                      {step.label}
-                    </span>
-                  </div>
-                  {i < timelineSteps.length - 1 && (
-                    <div
-                      className={`flex-1 h-0.5 mx-1 ${
-                        i < activeStep ? 'bg-jade-500' : 'bg-gray-200'
-                      }`}
-                    />
-                  )}
-                </div>
-              );
-            })}
+          {/* Vertical on mobile, horizontal on md+ */}
+          <div className="md:hidden">
+            <VerticalTimeline activeStep={activeStep} />
+          </div>
+          <div className="hidden md:block">
+            <HorizontalTimeline activeStep={activeStep} />
           </div>
         </div>
       )}
@@ -212,7 +262,7 @@ export function OrderDetailPage() {
           </div>
         </div>
 
-        {/* Right column — delivery + totals */}
+        {/* Right column — delivery + total */}
         <div className="space-y-6">
           {/* Delivery info */}
           <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5">
@@ -236,22 +286,12 @@ export function OrderDetailPage() {
             </div>
           </div>
 
-          {/* Price summary */}
+          {/* Order total — no subtotal/GST breakdown (unverified) */}
           <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">Order Summary</h2>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Subtotal</span>
-                <span className="text-gray-900">{formatCurrency(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">GST (15%)</span>
-                <span className="text-gray-900">{formatCurrency(gst)}</span>
-              </div>
-              <div className="border-t border-gray-100 pt-2 mt-2 flex justify-between">
-                <span className="text-sm font-semibold text-gray-900">Total</span>
-                <span className="text-lg font-bold text-jade-700">{formatCurrency(order.priceInclGst)}</span>
-              </div>
+            <h2 className="text-sm font-semibold text-gray-900 mb-4">Order Total</h2>
+            <div className="text-center py-2">
+              <p className="text-2xl font-bold text-jade-700">{formatCurrency(order.priceInclGst)}</p>
+              <p className="text-xs text-gray-400 mt-1">Including GST</p>
             </div>
           </div>
         </div>

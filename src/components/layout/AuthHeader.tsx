@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, LayoutDashboard, ShoppingBag, User, HelpCircle } from 'lucide-react';
+import { Menu, X, LayoutDashboard, ShoppingBag } from 'lucide-react';
 import { Logo } from './Logo';
 import { useMockAuth } from '../../hooks/useMockAuth';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/orders', label: 'My Orders', icon: ShoppingBag },
-  { to: '/account', label: 'Account', icon: User },
-  { to: '/support', label: 'Support', icon: HelpCircle },
 ];
 
 export function AuthHeader() {

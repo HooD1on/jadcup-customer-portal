@@ -1,32 +1,46 @@
-# React + TypeScript + Vite
+# Jadcup Customer Portal — Frontend Prototype
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A responsive, mobile-first React prototype for the Jadcup Customer Portal.
+Uses local mock data only. No backend API connections.
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Prototype Routes
+
+| Route | Description |
+|---|---|
+| `/` | Public marketing home page |
+| `/login` | Login placeholder (coming soon) |
+| `/apply` | Application placeholder (coming soon) |
+| `/dashboard` | Customer dashboard (mock authenticated) |
+| `/orders` | Order list with search, filter, pagination |
+| `/orders/ORD-2026-0098` | Example order detail (confirmed, 3 products) |
+| `/orders/ORD-2026-0072` | Example order detail (delivered, 4 products) |
+| `/orders/ORD-2026-0042` | Example order detail (cancelled, missing image) |
+| `/_demo` | Developer demo page for loading, empty, and error states |
+
+## Preview at Required Widths
+
+375px, 430px, 768px, 1024px, 1440px
+
+Use browser DevTools responsive mode to verify.
+
+## Build
+
+```bash
+npm run build
+npm run preview
+```
+
+## Stack
+
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS 4
+- React Router 6
+- Lucide React icons

@@ -7,7 +7,6 @@ import { ProductImage } from '../../components/ui/ProductImage';
 import { useMockAuth } from '../../hooks/useMockAuth';
 import { mockOrders, mockCredit, mockProductHighlights } from '../../mocks/data';
 import { formatCurrency, formatDate, formatRelativeDate } from '../../lib/format';
-import type { OrderStatus } from '../../types';
 
 const statusCounts = mockOrders.reduce(
   (acc, o) => {
@@ -17,9 +16,14 @@ const statusCounts = mockOrders.reduce(
   {} as Record<string, number>,
 );
 
+const inProgressCount =
+  (statusCounts['confirmed'] || 0) +
+  (statusCounts['in-production'] || 0) +
+  (statusCounts['ready-to-ship'] || 0);
+
 const summaryCards = [
   { label: 'Total Orders', value: mockOrders.length.toString(), icon: ShoppingBag, color: 'bg-blue-50 text-blue-600' },
-  { label: 'In Progress', value: (statusCounts['confirmed'] || 0 + (statusCounts['in-production'] || 0)).toString(), icon: Clock, color: 'bg-amber-50 text-amber-600' },
+  { label: 'In Progress', value: inProgressCount.toString(), icon: Clock, color: 'bg-amber-50 text-amber-600' },
   { label: 'Delivered', value: (statusCounts['delivered'] || 0).toString(), icon: TrendingUp, color: 'bg-jade-50 text-jade-600' },
 ];
 

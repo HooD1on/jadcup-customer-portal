@@ -16,14 +16,13 @@ export function PublicHeader() {
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
             <Link to="/" className="text-sm font-medium text-gray-600 hover:text-jade-700 no-underline">Home</Link>
-            <Link to="/products" className="text-sm font-medium text-gray-600 hover:text-jade-700 no-underline">Products</Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login">
+            <Link to="/login" className="no-underline">
               <Button variant="outline" size="sm">Log In</Button>
             </Link>
-            <Link to="/apply">
+            <Link to="/apply" className="no-underline">
               <Button variant="primary" size="sm">Apply for Account</Button>
             </Link>
           </div>
@@ -51,13 +50,6 @@ export function PublicHeader() {
               onClick={() => setMobileOpen(false)}
             >
               Home
-            </Link>
-            <Link
-              to="/products"
-              className="block px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 no-underline"
-              onClick={() => setMobileOpen(false)}
-            >
-              Products
             </Link>
             <div className="pt-3 border-t border-gray-100 space-y-2">
               <Link to="/login" className="block no-underline" onClick={() => setMobileOpen(false)}>

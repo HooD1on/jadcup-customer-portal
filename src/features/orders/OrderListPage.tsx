@@ -1,19 +1,14 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, ChevronLeft, ChevronRight, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { PageShell } from '../../components/layout/PageShell';
 import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ProductImage } from '../../components/ui/ProductImage';
-import { LoadingState } from '../../components/feedback/LoadingState';
 import { EmptyState } from '../../components/feedback/EmptyState';
-import { ErrorState } from '../../components/feedback/ErrorState';
-import { mockOrders } from '../../mocks/data';
+import { mockOrders, orderProductNames } from '../../mocks/data';
 import { formatCurrency, formatDate } from '../../lib/format';
 import { ORDER_STATUS_LABELS } from '../../types';
-import type { OrderStatus } from '../../types';
-
-type ViewMode = 'normal' | 'loading' | 'empty' | 'error';
 
 const PAGE_SIZE = 5;
 
@@ -28,25 +23,23 @@ export function OrderListPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
-  const [viewMode, setViewMode] = useState<ViewMode>('normal');
 
   const filtered = useMemo(() => {
-    if (viewMode !== 'normal') return [];
     return mockOrders.filter((o) => {
       if (search) {
         const q = search.toLowerCase();
-        if (
-          !o.orderNo.toLowerCase().includes(q) &&
-          !(o.custOrderNo?.toLowerCase().includes(q))
-        )
-          return false;
+        const matchesOrder =
+          o.orderNo.toLowerCase().includes(q) ||
+          (o.custOrderNo?.toLowerCase().includes(q) ?? false);
+        const matchesProduct = orderProductNames[o.orderId]?.includes(q) ?? false;
+        if (!matchesOrder && !matchesProduct) return false;
       }
       if (statusFilter && o.status !== statusFilter) return false;
       if (dateFrom && o.orderDate < dateFrom) return false;
       if (dateTo && o.orderDate > dateTo) return false;
       return true;
     });
-  }, [search, statusFilter, dateFrom, dateTo, viewMode]);
+  }, [search, statusFilter, dateFrom, dateTo]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -62,94 +55,66 @@ export function OrderListPage() {
   return (
     <PageShell>
       {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Orders</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {filtered.length} order{filtered.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-
-        {/* Demo mode switcher */}
-        <div className="flex gap-2 flex-wrap">
-          {(['normal', 'loading', 'empty', 'error'] as const).map((mode) => (
-            <Button
-              key={mode}
-              variant={viewMode === mode ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => { setViewMode(mode); setPage(1); }}
-            >
-              {mode === 'normal' ? 'Orders' : mode.charAt(0).toUpperCase() + mode.slice(1)}
-            </Button>
-          ))}
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Orders</h1>
+        <p className="text-sm text-gray-500 mt-0.5">
+          {filtered.length} order{filtered.length !== 1 ? 's' : ''}
+        </p>
       </div>
 
       {/* Filters */}
-      {viewMode === 'normal' && (
-        <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-4 mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Search */}
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search order or PO number..."
-                value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
-                aria-label="Search orders"
-              />
-            </div>
-
-            {/* Status filter */}
-            <div className="relative">
-              <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <select
-                value={statusFilter}
-                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none appearance-none bg-white"
-                aria-label="Filter by status"
-              >
-                {statusOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Date from */}
+      <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Search */}
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
-              aria-label="From date"
-            />
-
-            {/* Date to */}
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
-              aria-label="To date"
+              type="text"
+              placeholder="Search order, PO or product..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
+              aria-label="Search orders"
             />
           </div>
+
+          {/* Status filter */}
+          <div className="relative">
+            <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none appearance-none bg-white"
+              aria-label="Filter by status"
+            >
+              {statusOptions.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date from */}
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
+            aria-label="From date"
+          />
+
+          {/* Date to */}
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
+            aria-label="To date"
+          />
         </div>
-      )}
+      </div>
 
       {/* Content */}
-      {viewMode === 'loading' && <LoadingState message="Loading your orders..." />}
-      {viewMode === 'error' && <ErrorState onRetry={() => setViewMode('normal')} />}
-      {viewMode === 'empty' && (
-        <EmptyState
-          icon={<ShoppingBag className="text-gray-400" size={24} />}
-          title="No orders yet"
-          description="You don't have any orders yet. Once your orders are placed, they'll appear here."
-        />
-      )}
-
-      {viewMode === 'normal' && filtered.length === 0 && (
+      {filtered.length === 0 && (
         <EmptyState
           title="No orders found"
           description="No orders match your current filters."
@@ -161,7 +126,7 @@ export function OrderListPage() {
         />
       )}
 
-      {viewMode === 'normal' && filtered.length > 0 && (
+      {filtered.length > 0 && (
         <>
           {/* Desktop table */}
           <div className="hidden md:block bg-white rounded-(--radius-card) shadow-(--shadow-card) overflow-hidden">

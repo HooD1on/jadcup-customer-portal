@@ -29,7 +29,7 @@ export const mockCredit: CreditSummary = {
 
 const productPool: OrderProduct[] = [
   {
-    productImage: 'https://placehold.co/400x400/e8f5e9/166534?text=Cup+16oz',
+    productImage: '/img/cup-16oz.svg',
     customerProductCode: 'PF-CUP-16',
     productCode: 'JC-CUP-016',
     productName: '16oz Single Wall Paper Cup',
@@ -38,7 +38,7 @@ const productPool: OrderProduct[] = [
     price: 600.0,
   },
   {
-    productImage: 'https://placehold.co/400x400/e8f5e9/166534?text=Cup+12oz',
+    productImage: '/img/cup-12oz.svg',
     customerProductCode: 'PF-CUP-12',
     productCode: 'JC-CUP-012',
     productName: '12oz Double Wall Ripple Cup',
@@ -47,19 +47,19 @@ const productPool: OrderProduct[] = [
     price: 540.0,
   },
   {
-    productImage: 'https://placehold.co/400x400/e8f5e9/166534?text=Lid',
+    productImage: '/img/lid.svg',
     customerProductCode: null,
     productCode: 'JC-LID-080',
-    productName: '80mm Sip Lid – White',
+    productName: '80mm Sip Lid \u2013 White',
     unitPrice: 0.04,
     quantity: 5000,
     price: 200.0,
   },
   {
-    productImage: 'https://placehold.co/400x400/e8f5e9/166534?text=Box',
+    productImage: '/img/box.svg',
     customerProductCode: 'PF-BOX-M',
     productCode: 'JC-BOX-MED',
-    productName: 'Medium Corrugated Shipping Box – Custom Print',
+    productName: 'Medium Corrugated Shipping Box \u2013 Custom Print',
     unitPrice: 1.85,
     quantity: 500,
     price: 925.0,
@@ -68,13 +68,13 @@ const productPool: OrderProduct[] = [
     productImage: null,
     customerProductCode: 'PF-SLEEVE',
     productCode: 'JC-SLV-012',
-    productName: '12oz Cup Sleeve – Kraft with Pacific Fresh Full Colour Print and Extended Branding Area',
+    productName: '12oz Cup Sleeve \u2013 Kraft with Pacific Fresh Full Colour Print and Extended Branding Area',
     unitPrice: 0.06,
     quantity: 3000,
     price: 180.0,
   },
   {
-    productImage: 'https://placehold.co/400x400/e8f5e9/166534?text=Bowl',
+    productImage: '/img/bowl.svg',
     customerProductCode: null,
     productCode: 'JC-BWL-032',
     productName: '32oz Salad Bowl with Lid',
@@ -83,10 +83,10 @@ const productPool: OrderProduct[] = [
     price: 700.0,
   },
   {
-    productImage: 'https://placehold.co/400x400/e8f5e9/166534?text=Tray',
+    productImage: '/img/tray.svg',
     customerProductCode: 'PF-TRAY-L',
     productCode: 'JC-TRY-LRG',
-    productName: 'Large Food Tray – Printed',
+    productName: 'Large Food Tray \u2013 Printed',
     unitPrice: 0.45,
     quantity: 1000,
     price: 450.0,
@@ -270,28 +270,38 @@ export const mockProductHighlights: ProductHighlight[] = [
     id: 1,
     name: 'Custom Printed Cups',
     description: 'Premium single and double wall paper cups with your brand, available in 8oz to 24oz.',
-    image: 'https://placehold.co/600x400/e8f5e9/166534?text=Custom+Cups',
+    image: '/img/highlight-cups.svg',
     productCode: 'JC-CUP',
   },
   {
     id: 2,
     name: 'Food Packaging',
     description: 'Sustainable food trays, bowls, and containers for every occasion.',
-    image: 'https://placehold.co/600x400/e8f5e9/166534?text=Food+Packaging',
+    image: '/img/highlight-packaging.svg',
     productCode: 'JC-PKG',
   },
   {
     id: 3,
     name: 'Corrugated Boxes',
     description: 'Custom-printed corrugated shipping and display boxes in any size.',
-    image: 'https://placehold.co/600x400/e8f5e9/166534?text=Corrugated+Boxes',
+    image: '/img/highlight-boxes.svg',
     productCode: 'JC-BOX',
   },
   {
     id: 4,
     name: 'Cup Accessories',
     description: 'Lids, sleeves, stirrers, and carriers to complement your cup range.',
-    image: 'https://placehold.co/600x400/e8f5e9/166534?text=Accessories',
+    image: '/img/highlight-accessories.svg',
     productCode: 'JC-ACC',
   },
 ];
+
+// ─── Product name lookup for order search ────────────────────────────
+
+/** Maps orderId to a searchable string of all product names in that order. */
+export const orderProductNames: Record<string, string> = Object.fromEntries(
+  Object.entries(mockOrderDetails).map(([id, detail]) => [
+    id,
+    detail.products.map((p) => p.productName.toLowerCase()).join(' '),
+  ]),
+);

@@ -1,5 +1,3 @@
-import { Logo } from './Logo';
-
 export function Footer() {
   return (
     <footer className="bg-jade-950 text-jade-100">

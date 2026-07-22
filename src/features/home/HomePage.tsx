@@ -6,18 +6,18 @@ import { mockProductHighlights } from '../../mocks/data';
 const benefits = [
   {
     icon: ShoppingBagIcon,
-    title: 'Track Your Orders',
-    description: 'View real-time status updates on all your orders from placement to delivery.',
+    title: 'View Your Orders',
+    description: 'See order status and history for all your Jadcup orders in one place.',
   },
   {
     icon: CreditCardIcon,
-    title: 'View Your Credit',
-    description: 'Check your account balance and transaction history at a glance.',
+    title: 'Account Balance',
+    description: 'Check your current account balance at a glance.',
   },
   {
     icon: TruckIcon,
-    title: 'Delivery Updates',
-    description: 'Know exactly when your products will arrive with delivery tracking.',
+    title: 'Delivery Information',
+    description: 'View delivery details and dates for your orders.',
   },
   {
     icon: ShieldIcon,
@@ -61,6 +61,21 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Dev-only preview entry */}
+      <div className="bg-amber-50 border-b border-amber-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <p className="text-sm text-amber-800">
+            <span className="font-mono text-xs bg-amber-100 border border-amber-300 rounded px-1.5 py-0.5 mr-2">DEV</span>
+            Preview the authenticated customer experience with mock data.
+          </p>
+          <Link to="/dashboard" className="no-underline">
+            <Button size="sm" className="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white">
+              Preview Customer Portal <ArrowRight size={14} />
+            </Button>
+          </Link>
+        </div>
+      </div>
 
       {/* About Jadcup */}
       <section className="bg-white py-16 md:py-20">
