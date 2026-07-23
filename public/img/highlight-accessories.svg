@@ -1,4 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
-  <rect width="600" height="400" fill="#e8f5e9"/>
-  <text x="50%" y="50%" text-anchor="middle" dy=".35em" font-family="system-ui,sans-serif" font-size="32" font-weight="600" fill="#166534">Accessories</text>
+  <defs>
+    <filter id="shAcc" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="3" stdDeviation="5" flood-color="#166534" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+  <rect width="600" height="400" rx="16" fill="#bbf7d0"/>
+  <path d="M0 375 Q300 355 600 375 L600 400 L0 400 Z" fill="#86efac" opacity="0.3"/>
+  <!-- LID - left side, 3/4 top view -->
+  <g filter="url(#shAcc)">
+    <ellipse cx="150" cy="225" rx="110" ry="48" fill="#86efac"/>
+    <ellipse cx="150" cy="220" rx="105" ry="44" fill="#dcfce7"/>
+    <ellipse cx="150" cy="220" rx="85" ry="35" fill="none" stroke="#86efac" stroke-width="1.5"/>
+    <ellipse cx="150" cy="218" rx="68" ry="28" fill="#e8f5e9"/>
+    <ellipse cx="150" cy="216" rx="48" ry="18" fill="none" stroke="#bbf7d0" stroke-width="1.2"/>
+    <!-- Sip opening -->
+    <ellipse cx="130" cy="212" rx="16" ry="5" fill="#15803d" opacity="0.4"/>
+    <path d="M118 209 Q122 204 140 205 L140 208 Q125 208 122 212 Z" fill="#16a34a" opacity="0.5"/>
+    <!-- Rim highlight -->
+    <path d="M50 218 Q100 185 150 180 Q200 185 250 218" fill="none" stroke="#e8f5e9" stroke-width="2.5" opacity="0.5"/>
+  </g>
+  <!-- SLEEVE/WRAPPER - center -->
+  <g filter="url(#shAcc)">
+    <!-- Flat sleeve band shape -->
+    <path d="M290 170 L280 300 Q280 312 345 312 Q410 312 410 300 L400 170 Q400 158 345 158 Q290 158 290 170 Z" fill="#166534"/>
+    <path d="M294 173 L284 298 Q286 308 345 308 Q404 308 406 298 L396 173 Q394 163 345 163 Q296 163 294 173 Z" fill="#15803d"/>
+    <!-- Texture lines on sleeve -->
+    <path d="M292 195 Q345 203 400 195" fill="none" stroke="#166534" stroke-width="1.5" opacity="0.4"/>
+    <path d="M290 225 Q345 233 398 225" fill="none" stroke="#166534" stroke-width="1.5" opacity="0.4"/>
+    <path d="M288 255 Q345 263 396 255" fill="none" stroke="#166534" stroke-width="1.5" opacity="0.4"/>
+    <path d="M286 285 Q345 293 394 285" fill="none" stroke="#166534" stroke-width="1.5" opacity="0.4"/>
+    <!-- Highlight -->
+    <path d="M298 175 L290 296 Q295 305 318 308 L325 175 Z" fill="#22c55e" opacity="0.25"/>
+  </g>
+  <!-- SMALL CUP - right side -->
+  <g filter="url(#shAcc)">
+    <ellipse cx="505" cy="340" rx="40" ry="7" fill="#166534" opacity="0.1"/>
+    <path d="M475 185 L468 328 Q468 338 505 338 Q542 338 542 328 L535 185 Z" fill="#22c55e"/>
+    <path d="M479 189 L473 325 Q475 333 505 333 Q520 333 530 328 L533 189 Z" fill="#16a34a" opacity="0.2"/>
+    <path d="M483 191 L478 320 Q482 328 495 330 L498 191 Z" fill="#86efac" opacity="0.3"/>
+    <!-- Lid -->
+    <ellipse cx="505" cy="185" rx="33" ry="9" fill="#86efac"/>
+    <rect x="475" y="173" width="60" height="12" rx="2" fill="#bbf7d0"/>
+    <ellipse cx="505" cy="173" rx="30" ry="8" fill="#dcfce7"/>
+    <ellipse cx="512" cy="171" rx="6" ry="2.5" fill="#bbf7d0" stroke="#86efac" stroke-width="0.8"/>
+  </g>
 </svg>

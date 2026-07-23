@@ -1,4 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
-  <rect width="600" height="400" fill="#e8f5e9"/>
-  <text x="50%" y="50%" text-anchor="middle" dy=".35em" font-family="system-ui,sans-serif" font-size="32" font-weight="600" fill="#166534">Corrugated Boxes</text>
+  <defs>
+    <filter id="shBox" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="4" stdDeviation="5" flood-color="#166534" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect width="600" height="400" rx="16" fill="#f0fdf4"/>
+  <rect y="360" width="600" height="40" rx="0" fill="#e8f5e9"/>
+  <!-- BOX 1 - closed, left side -->
+  <g filter="url(#shBox)">
+    <polygon points="80,180 230,150 290,180 140,210" fill="#86efac"/>
+    <polygon points="80,180 140,210 140,340 80,315" fill="#22c55e"/>
+    <polygon points="140,210 290,180 290,310 140,340" fill="#15803d"/>
+    <!-- Top flap lines -->
+    <line x1="160" y1="165" x2="160" y2="210" stroke="#22c55e" stroke-width="1" opacity="0.5"/>
+    <path d="M110 195 Q185 175 260 165" fill="none" stroke="#22c55e" stroke-width="0.8" opacity="0.4"/>
+    <!-- Front corrugation -->
+    <line x1="80" y1="230" x2="140" y2="245" stroke="#16a34a" stroke-width="0.7" opacity="0.2"/>
+    <line x1="80" y1="260" x2="140" y2="275" stroke="#16a34a" stroke-width="0.7" opacity="0.2"/>
+    <line x1="80" y1="290" x2="140" y2="305" stroke="#16a34a" stroke-width="0.7" opacity="0.2"/>
+    <!-- Side corrugation -->
+    <line x1="140" y1="250" x2="290" y2="225" stroke="#166534" stroke-width="0.7" opacity="0.15"/>
+    <line x1="140" y1="280" x2="290" y2="255" stroke="#166534" stroke-width="0.7" opacity="0.15"/>
+    <line x1="140" y1="310" x2="290" y2="285" stroke="#166534" stroke-width="0.7" opacity="0.15"/>
+    <!-- Front highlight -->
+    <polygon points="85,185 115,195 115,310 85,300" fill="#86efac" opacity="0.15"/>
+  </g>
+  <!-- BOX 2 - open, right side -->
+  <g filter="url(#shBox)">
+    <polygon points="340,200 480,172 535,200 395,228" fill="#86efac"/>
+    <polygon points="340,200 395,228 395,345 340,322" fill="#22c55e"/>
+    <polygon points="395,228 535,200 535,318 395,345" fill="#16a34a"/>
+    <!-- Open top flaps -->
+    <!-- Back flap -->
+    <polygon points="340,200 480,172 480,148 340,172" fill="#bbf7d0"/>
+    <line x1="340" y1="200" x2="340" y2="172" stroke="#22c55e" stroke-width="1"/>
+    <line x1="480" y1="172" x2="480" y2="148" stroke="#16a34a" stroke-width="1"/>
+    <!-- Right flap -->
+    <polygon points="480,172 535,200 558,180 492,148" fill="#86efac" opacity="0.7"/>
+    <line x1="535" y1="200" x2="558" y2="180" stroke="#16a34a" stroke-width="1" opacity="0.5"/>
+    <!-- Inner visible -->
+    <polygon points="345,200 478,174 530,200 398,226" fill="#15803d" opacity="0.3"/>
+    <!-- Front corrugation -->
+    <line x1="340" y1="245" x2="395" y2="260" stroke="#16a34a" stroke-width="0.7" opacity="0.2"/>
+    <line x1="340" y1="275" x2="395" y2="290" stroke="#16a34a" stroke-width="0.7" opacity="0.2"/>
+    <line x1="340" y1="305" x2="395" y2="318" stroke="#16a34a" stroke-width="0.7" opacity="0.2"/>
+    <!-- Side corrugation -->
+    <line x1="395" y1="265" x2="535" y2="240" stroke="#166534" stroke-width="0.7" opacity="0.15"/>
+    <line x1="395" y1="295" x2="535" y2="270" stroke="#166534" stroke-width="0.7" opacity="0.15"/>
+    <line x1="395" y1="320" x2="535" y2="298" stroke="#166534" stroke-width="0.7" opacity="0.15"/>
+    <!-- Front highlight -->
+    <polygon points="345,205 370,215 370,318 345,310" fill="#86efac" opacity="0.15"/>
+  </g>
 </svg>

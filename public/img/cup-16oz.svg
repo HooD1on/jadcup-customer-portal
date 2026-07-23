@@ -1,4 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
-  <rect width="400" height="400" fill="#e8f5e9"/>
-  <text x="50%" y="50%" text-anchor="middle" dy=".35em" font-family="system-ui,sans-serif" font-size="28" font-weight="600" fill="#166534">Cup 16oz</text>
+  <defs>
+    <filter id="shadow16" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="4" stdDeviation="6" flood-color="#166534" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect width="400" height="400" rx="16" fill="#e8f5e9"/>
+  <!-- Shadow at base -->
+  <ellipse cx="200" cy="340" rx="70" ry="12" fill="#166534" opacity="0.15"/>
+  <!-- Cup body - tall tapered shape -->
+  <path d="M148 100 L138 320 Q138 335 200 335 Q262 335 262 320 L252 100 Z" fill="#15803d" filter="url(#shadow16)"/>
+  <!-- Cup body highlight -->
+  <path d="M155 105 L146 318 Q148 330 200 330 Q220 330 230 327 L238 105 Z" fill="#16a34a"/>
+  <!-- Left highlight streak -->
+  <path d="M160 110 L152 315 Q155 325 170 328 L178 110 Z" fill="#22c55e" opacity="0.4"/>
+  <!-- Sleeve band -->
+  <path d="M152 185 L148 255 Q148 268 200 268 Q252 268 252 255 L248 185 Q248 172 200 172 Q152 172 152 185 Z" fill="#166534"/>
+  <path d="M154 188 L150 252 Q152 262 200 262 Q248 262 250 252 L246 188 Q244 178 200 178 Q156 178 154 188 Z" fill="#15803d"/>
+  <!-- Lid -->
+  <ellipse cx="200" cy="100" rx="55" ry="14" fill="#86efac"/>
+  <rect x="148" y="80" width="104" height="20" rx="2" fill="#bbf7d0"/>
+  <ellipse cx="200" cy="80" rx="52" ry="12" fill="#dcfce7"/>
+  <!-- Lid top detail -->
+  <ellipse cx="200" cy="80" rx="35" ry="8" fill="none" stroke="#86efac" stroke-width="1.5"/>
+  <!-- Sip hole on lid -->
+  <ellipse cx="210" cy="78" rx="8" ry="3" fill="#bbf7d0" stroke="#86efac" stroke-width="1"/>
+  <!-- Bottom rim -->
+  <ellipse cx="200" cy="335" rx="62" ry="10" fill="#166534"/>
 </svg>

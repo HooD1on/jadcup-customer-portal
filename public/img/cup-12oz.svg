@@ -1,4 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
-  <rect width="400" height="400" fill="#e8f5e9"/>
-  <text x="50%" y="50%" text-anchor="middle" dy=".35em" font-family="system-ui,sans-serif" font-size="28" font-weight="600" fill="#166534">Cup 12oz</text>
+  <defs>
+    <filter id="shadow12" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="2" dy="4" stdDeviation="6" flood-color="#166534" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  <rect width="400" height="400" rx="16" fill="#dcfce7"/>
+  <!-- Base shadow -->
+  <ellipse cx="200" cy="340" rx="78" ry="14" fill="#15803d" opacity="0.15"/>
+  <!-- Cup body - shorter wider -->
+  <path d="M135 130 L128 320 Q128 338 200 338 Q272 338 272 320 L265 130 Z" fill="#22c55e" filter="url(#shadow12)"/>
+  <!-- Ripple texture lines -->
+  <path d="M133 160 Q200 170 267 160" fill="none" stroke="#16a34a" stroke-width="2.5" opacity="0.6"/>
+  <path d="M132 185 Q200 195 266 185" fill="none" stroke="#16a34a" stroke-width="2.5" opacity="0.6"/>
+  <path d="M131 210 Q200 220 265 210" fill="none" stroke="#16a34a" stroke-width="2.5" opacity="0.6"/>
+  <path d="M130 235 Q200 245 264 235" fill="none" stroke="#16a34a" stroke-width="2.5" opacity="0.6"/>
+  <path d="M129 260 Q200 270 263 260" fill="none" stroke="#16a34a" stroke-width="2.5" opacity="0.6"/>
+  <path d="M129 285 Q200 295 263 285" fill="none" stroke="#16a34a" stroke-width="2.5" opacity="0.6"/>
+  <path d="M128 310 Q200 320 262 310" fill="none" stroke="#16a34a" stroke-width="2.5" opacity="0.6"/>
+  <!-- Left highlight -->
+  <path d="M142 135 L136 315 Q140 330 165 333 L170 135 Z" fill="#86efac" opacity="0.35"/>
+  <!-- Lid -->
+  <ellipse cx="200" cy="130" rx="68" ry="16" fill="#86efac"/>
+  <rect x="136" y="112" width="128" height="18" rx="2" fill="#bbf7d0"/>
+  <ellipse cx="200" cy="112" rx="64" ry="14" fill="#e8f5e9"/>
+  <!-- Lid sip opening -->
+  <ellipse cx="212" cy="110" rx="10" ry="3.5" fill="#bbf7d0" stroke="#86efac" stroke-width="1"/>
+  <!-- Lid ring -->
+  <ellipse cx="200" cy="112" rx="42" ry="9" fill="none" stroke="#86efac" stroke-width="1.2"/>
+  <!-- Bottom ellipse -->
+  <ellipse cx="200" cy="338" rx="72" ry="12" fill="#16a34a"/>
 </svg>

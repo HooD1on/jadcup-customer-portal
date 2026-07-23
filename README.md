@@ -39,7 +39,7 @@ npm run preview
 
 ## Stack
 
-- React 18 + TypeScript
+- React 19 + TypeScript
 - Vite
 - Tailwind CSS 4
 - React Router 6

@@ -236,9 +236,7 @@ export function OrderDetailPage() {
                         {product.productName}
                       </h3>
                       <p className="text-xs text-gray-500 mb-3">
-                        {product.customerProductCode
-                          ? `${product.customerProductCode} (${product.productCode})`
-                          : product.productCode}
+                        {product.customerProductCode || product.productCode}
                       </p>
                       <div className="grid grid-cols-3 gap-2">
                         <div>

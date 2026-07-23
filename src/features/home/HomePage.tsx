@@ -47,7 +47,7 @@ export function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link to="/apply">
-                <Button size="lg" className="w-full sm:w-auto bg-white text-jade-900 hover:bg-jade-50 active:bg-jade-100">
+                <Button size="lg" variant="light" className="w-full sm:w-auto">
                   Apply for an Account
                   <ArrowRight size={18} />
                 </Button>
@@ -176,7 +176,7 @@ export function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link to="/apply">
-              <Button size="lg" className="w-full sm:w-auto bg-white text-jade-900 hover:bg-jade-50 active:bg-jade-100">
+              <Button size="lg" variant="light" className="w-full sm:w-auto">
                 Apply for an Account
               </Button>
             </Link>
