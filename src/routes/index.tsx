@@ -1,6 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { PublicLayout } from '../components/layout/PublicLayout';
-import { AuthLayout } from '../components/layout/AuthLayout';
 import { HomePage } from '../features/home/HomePage';
 import { LoginPage } from '../features/auth/LoginPage';
 import { ApplyPage } from '../features/apply/ApplyPage';
@@ -9,6 +8,8 @@ import { OrderListPage } from '../features/orders/OrderListPage';
 import { OrderDetailPage } from '../features/orders/OrderDetailPage';
 import { DemoPage } from '../features/demo/DemoPage';
 import { NotFoundPage } from '../features/NotFoundPage';
+import { ApplicationStatusPage } from '../features/auth/ApplicationStatusPage';
+import { RequireApprovedAccount, RequirePortalSession } from '../features/auth/RouteGuards';
 
 export const router = createBrowserRouter([
   {
@@ -17,10 +18,18 @@ export const router = createBrowserRouter([
       { path: '/', element: <HomePage /> },
       { path: '/login', element: <LoginPage /> },
       { path: '/apply', element: <ApplyPage /> },
+      {
+        path: '/application-status',
+        element: (
+          <RequirePortalSession>
+            <ApplicationStatusPage />
+          </RequirePortalSession>
+        ),
+      },
     ],
   },
   {
-    element: <AuthLayout />,
+    element: <RequireApprovedAccount />,
     children: [
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/orders', element: <OrderListPage /> },

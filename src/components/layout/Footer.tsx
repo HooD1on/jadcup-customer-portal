@@ -49,7 +49,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-jade-800 mt-10 pt-6 text-center">
-          <p className="text-xs text-jade-400">&copy; 2026 Jadcup. All rights reserved. This is a prototype.</p>
+          <p className="text-xs text-jade-400">&copy; 2026 Jadcup. All rights reserved.</p>
         </div>
       </div>
     </footer>

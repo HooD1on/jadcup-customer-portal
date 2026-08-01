@@ -1,11 +1,20 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { LogOut, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { Button } from '../ui/Button';
+import { useAuth } from '../../features/auth/AuthContext';
 
 export function PublicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
+  const { session, logout } = useAuth();
+
+  const signOut = () => {
+    logout();
+    setMobileOpen(false);
+    navigate('/login', { replace: true });
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -19,12 +28,31 @@ export function PublicHeader() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login" className="no-underline">
-              <Button variant="outline" size="sm">Log In</Button>
-            </Link>
-            <Link to="/apply" className="no-underline">
-              <Button variant="primary" size="sm">Apply for Account</Button>
-            </Link>
+            {session ? (
+              <>
+                <Link
+                  to={session.accountStatus === 'Approved' ? '/dashboard' : '/application-status'}
+                  className="no-underline"
+                >
+                  <Button variant="outline" size="sm">
+                    {session.accountStatus === 'Approved' ? 'Dashboard' : 'Application Status'}
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={signOut}>
+                  <LogOut size={15} />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="no-underline">
+                  <Button variant="outline" size="sm">Log In</Button>
+                </Link>
+                <Link to="/apply" className="no-underline">
+                  <Button variant="primary" size="sm">Apply for Account</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -52,12 +80,32 @@ export function PublicHeader() {
               Home
             </Link>
             <div className="pt-3 border-t border-gray-100 space-y-2">
-              <Link to="/login" className="block no-underline" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" size="md" className="w-full">Log In</Button>
-              </Link>
-              <Link to="/apply" className="block no-underline" onClick={() => setMobileOpen(false)}>
-                <Button variant="primary" size="md" className="w-full">Apply for Account</Button>
-              </Link>
+              {session ? (
+                <>
+                  <Link
+                    to={session.accountStatus === 'Approved' ? '/dashboard' : '/application-status'}
+                    className="block no-underline"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <Button variant="outline" size="md" className="w-full">
+                      {session.accountStatus === 'Approved' ? 'Dashboard' : 'Application Status'}
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="md" className="w-full" onClick={signOut}>
+                    <LogOut size={16} />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="block no-underline" onClick={() => setMobileOpen(false)}>
+                    <Button variant="outline" size="md" className="w-full">Log In</Button>
+                  </Link>
+                  <Link to="/apply" className="block no-underline" onClick={() => setMobileOpen(false)}>
+                    <Button variant="primary" size="md" className="w-full">Apply for Account</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </nav>
