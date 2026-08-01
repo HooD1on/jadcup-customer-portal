@@ -1,223 +1,213 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  FileText,
-  Building2,
-  User,
-  CheckCircle2,
-  Loader2,
-  ClipboardList,
-  UserCheck,
-  Mail,
   ArrowRight,
+  Building2,
+  CheckCircle2,
+  ClipboardList,
+  Eye,
+  EyeOff,
+  FileText,
+  KeyRound,
+  Loader2,
+  LogIn,
+  SearchCheck,
+  ShieldCheck,
+  User,
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { FormField } from '../../components/ui/FormField';
-
-// ─── Types ───────────────────────────────────────────────────────────
+import { portalAccountApi } from '../../services/portalAccountApi';
 
 interface ApplicationForm {
-  company: string;
-  nzbn: string;
-  address: string;
-  suburb: string;
-  city: string;
-  postalCode: string;
-  contactPerson: string;
+  userName: string;
+  password: string;
+  confirmPassword: string;
+  registeredBusinessName: string;
+  registeredContactName: string;
   email: string;
   phone: string;
-  mobile: string;
-  message: string;
+  notes: string;
   consent: boolean;
 }
 
-type FieldErrors = Partial<Record<keyof ApplicationForm, string>>;
+type FieldErrors = Partial<Record<keyof ApplicationForm | 'form', string>>;
 
 const initialForm: ApplicationForm = {
-  company: '',
-  nzbn: '',
-  address: '',
-  suburb: '',
-  city: '',
-  postalCode: '',
-  contactPerson: '',
+  userName: '',
+  password: '',
+  confirmPassword: '',
+  registeredBusinessName: '',
+  registeredContactName: '',
   email: '',
   phone: '',
-  mobile: '',
-  message: '',
+  notes: '',
   consent: false,
 };
 
-const MESSAGE_MAX = 500;
-
-// ─── Validation ──────────────────────────────────────────────────────
+const NOTES_MAX = 500;
 
 function validate(form: ApplicationForm): FieldErrors {
   const errors: FieldErrors = {};
+  const userName = form.userName.trim();
+  const businessName = form.registeredBusinessName.trim();
+  const contactName = form.registeredContactName.trim();
+  const email = form.email.trim();
+  const phone = form.phone.trim();
 
-  if (!form.company.trim()) errors.company = 'Company name is required.';
-  if (!form.address.trim()) errors.address = 'Business address is required.';
-  if (!form.city.trim()) errors.city = 'City is required.';
-  if (!form.postalCode.trim()) {
-    errors.postalCode = 'Postal code is required.';
-  } else if (!/^\d{4}$/.test(form.postalCode.trim())) {
-    errors.postalCode = 'Enter a valid 4-digit New Zealand postal code.';
-  }
-  if (!form.contactPerson.trim()) errors.contactPerson = 'Contact person is required.';
-  if (!form.email.trim()) {
-    errors.email = 'Work email is required.';
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-    errors.email = 'Please enter a valid email address.';
-  }
-  if (!form.phone.trim()) {
-    errors.phone = 'Phone number is required.';
-  } else if (!/^[\d\s\-+()]{7,15}$/.test(form.phone.trim())) {
-    errors.phone = 'Please enter a valid phone number.';
-  }
-  if (form.mobile.trim() && !/^[\d\s\-+()]{7,15}$/.test(form.mobile.trim())) {
-    errors.mobile = 'Please enter a valid mobile number.';
-  }
-  if (form.message.length > MESSAGE_MAX) {
-    errors.message = `Message must not exceed ${MESSAGE_MAX} characters.`;
-  }
-  if (!form.consent) errors.consent = 'You must agree to continue.';
+  if (!userName) errors.userName = 'Username is required.';
+  else if (userName.length > 50) errors.userName = 'Username must not exceed 50 characters.';
 
+  if (!form.password) errors.password = 'Password is required.';
+  else if (form.password.length < 8) errors.password = 'Password must contain at least 8 characters.';
+  else if (form.password.length > 128) errors.password = 'Password must not exceed 128 characters.';
+
+  if (!form.confirmPassword) errors.confirmPassword = 'Confirm your password.';
+  else if (form.confirmPassword !== form.password) errors.confirmPassword = 'Passwords do not match.';
+
+  if (!businessName) errors.registeredBusinessName = 'Company or trading name is required.';
+  else if (businessName.length > 200) errors.registeredBusinessName = 'Company name must not exceed 200 characters.';
+
+  if (!contactName) errors.registeredContactName = 'Contact person is required.';
+  else if (contactName.length > 60) errors.registeredContactName = 'Contact name must not exceed 60 characters.';
+
+  if (!email) errors.email = 'Work email is required.';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Enter a valid email address.';
+  else if (email.length > 100) errors.email = 'Email must not exceed 100 characters.';
+
+  if (phone.length > 255) errors.phone = 'Phone number is too long.';
+  else if (phone && !/^[\d\s\-+()]{7,30}$/.test(phone)) errors.phone = 'Enter a valid phone number.';
+
+  if (form.notes.length > NOTES_MAX) errors.notes = `Notes must not exceed ${NOTES_MAX} characters.`;
+  if (!form.consent) errors.consent = 'You must agree before submitting.';
   return errors;
 }
 
-// ─── Field-to-element-id mapping ─────────────────────────────────────
-
-const fieldIds: Record<string, string> = {
-  company: 'apply-company',
-  address: 'apply-address',
-  city: 'apply-city',
-  postalCode: 'apply-postal',
-  contactPerson: 'apply-contact',
+const fieldIds: Record<keyof ApplicationForm, string> = {
+  userName: 'apply-username',
+  password: 'apply-password',
+  confirmPassword: 'apply-confirm-password',
+  registeredBusinessName: 'apply-company',
+  registeredContactName: 'apply-contact',
   email: 'apply-email',
   phone: 'apply-phone',
-  mobile: 'apply-mobile',
-  message: 'apply-message',
+  notes: 'apply-notes',
   consent: 'apply-consent',
-  nzbn: 'apply-nzbn',
-  suburb: 'apply-suburb',
 };
 
-// ─── Process steps ───────────────────────────────────────────────────
-
 const processSteps = [
-  { icon: ClipboardList, title: 'Submit Application', desc: 'Fill out the form below with your company details.' },
-  { icon: UserCheck, title: 'Staff Review', desc: 'Our team will review your application and verify your details.' },
-  { icon: Mail, title: 'Account Activation', desc: 'Once approved, you will receive instructions to activate your portal account.' },
+  { icon: ClipboardList, title: 'Create your login', description: 'Choose a username and password, then submit your company details.' },
+  { icon: SearchCheck, title: 'Staff review', description: 'Jadcup staff verify your application and link it to the correct customer record.' },
+  { icon: ShieldCheck, title: 'Portal access', description: 'Sign in at any time to check the status. Approved accounts can access the portal.' },
 ];
-
-// ─── Component ───────────────────────────────────────────────────────
 
 export function ApplyPage() {
   const [form, setForm] = useState<ApplicationForm>(initialForm);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [submittedUserName, setSubmittedUserName] = useState<string>();
+  const [showPassword, setShowPassword] = useState(false);
 
   const updateField = useCallback(<K extends keyof ApplicationForm>(
     field: K,
     value: ApplicationForm[K],
   ) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => {
-      if (!prev[field]) return prev;
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
+    setForm((previous) => ({ ...previous, [field]: value }));
+    setErrors((previous) => ({ ...previous, [field]: undefined, form: undefined }));
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     const validationErrors = validate(form);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
-      // Focus the first field with an error
       const fieldOrder: (keyof ApplicationForm)[] = [
-        'company', 'nzbn', 'address', 'suburb', 'city', 'postalCode',
-        'contactPerson', 'email', 'phone', 'mobile', 'message', 'consent',
+        'userName',
+        'password',
+        'confirmPassword',
+        'registeredBusinessName',
+        'registeredContactName',
+        'email',
+        'phone',
+        'notes',
+        'consent',
       ];
-      for (const field of fieldOrder) {
-        if (validationErrors[field]) {
-          document.getElementById(fieldIds[field])?.focus();
-          break;
-        }
-      }
+      const firstInvalidField = fieldOrder.find((field) => validationErrors[field]);
+      if (firstInvalidField) document.getElementById(fieldIds[firstInvalidField])?.focus();
       return;
     }
 
     setIsSubmitting(true);
-
-    // --- PROTOTYPE ONLY ---
-    // Simulates submission delay. No data is sent anywhere.
-    // Must be replaced with a real POST to the portal application endpoint.
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    // --- END PROTOTYPE ONLY ---
+    try {
+      await portalAccountApi.register({
+        userName: form.userName.trim(),
+        password: form.password,
+        registeredBusinessName: form.registeredBusinessName.trim(),
+        registeredContactName: form.registeredContactName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
+        notes: form.notes.trim() || undefined,
+      });
+      setSubmittedUserName(form.userName.trim());
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      setErrors({
+        form: error instanceof Error ? error.message : 'Unable to submit your application. Please try again.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleReset = () => {
-    setForm(initialForm);
-    setErrors({});
-    setIsSubmitted(false);
-  };
-
-  // ─── Success state ─────────────────────────────────────────────────
-
-  if (isSubmitted) {
+  if (submittedUserName) {
     return (
-      <div className="flex-1 bg-gray-50">
+      <main className="flex-1 bg-gray-50">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-          <div
-            className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-8 sm:p-10 text-center"
-            role="status"
-            aria-live="polite"
-          >
+          <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-8 sm:p-10 text-center" role="status">
             <div className="w-16 h-16 rounded-full bg-jade-100 flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="text-jade-600" size={32} />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">Application Received</h1>
-            <p className="text-gray-600 leading-relaxed max-w-md mx-auto mb-2">
-              Thank you for applying for a Jadcup customer account. Our staff will review
-              your application and contact you.
+            <h1 className="text-2xl font-bold text-gray-900 mb-3">Application received</h1>
+            <p className="text-gray-600 leading-relaxed max-w-md mx-auto">
+              Your Customer Portal account is now awaiting review by Jadcup staff.
             </p>
-            <p className="text-sm text-gray-400 max-w-md mx-auto mb-8">
-              Submitting this application does not immediately create or activate a portal account.
+            <div className="mt-6 p-4 bg-gray-50 rounded-(--radius-button)">
+              <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">Your portal username</p>
+              <p className="font-semibold text-gray-900">{submittedUserName}</p>
+            </div>
+            <p className="text-sm text-gray-500 mt-5">
+              You can sign in now to check whether your application is pending, approved, or rejected.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-3">
-              <Link to="/" className="no-underline">
-                <Button variant="outline" className="w-full sm:w-auto">Return to Home</Button>
-              </Link>
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
               <Link to="/login" className="no-underline">
-                <Button variant="secondary" className="w-full sm:w-auto">Go to Login</Button>
+                <Button className="w-full sm:w-auto"><LogIn size={17} />Sign In</Button>
               </Link>
-              <Button variant="ghost" onClick={handleReset} className="w-full sm:w-auto">
-                Submit Another Application
-              </Button>
+              <Link to="/" className="no-underline">
+                <Button variant="outline" className="w-full sm:w-auto">Return Home</Button>
+              </Link>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
-  // ─── Form state ────────────────────────────────────────────────────
+  const passwordToggle = (
+    <button
+      type="button"
+      onClick={() => setShowPassword((visible) => !visible)}
+      className="p-2 text-gray-400 hover:text-gray-600 rounded"
+      aria-label={showPassword ? 'Hide passwords' : 'Show passwords'}
+    >
+      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+    </button>
+  );
 
   return (
-    <div className="flex-1 bg-gray-50">
+    <main className="flex-1 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
-
-          {/* Left — info panel (2/5 width on desktop) */}
           <div className="lg:col-span-2 hidden md:block lg:py-4">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-jade-700 rounded-xl flex items-center justify-center">
@@ -230,131 +220,105 @@ export function ApplyPage() {
             </div>
 
             <p className="text-gray-600 leading-relaxed mb-8">
-              Apply for a Jadcup customer account. Once submitted, our staff will review
-              your application and contact you. Approved applications will be linked to
-              the correct customer or company record before portal access is activated.
+              Create your portal login and tell us which business you represent. You do not need a Jadcup customer code—our staff will find and confirm the correct customer record.
             </p>
 
             <h2 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">How it works</h2>
             <div className="space-y-5">
-              {processSteps.map(({ icon: Icon, title, desc }, i) => (
+              {processSteps.map(({ icon: Icon, title, description }, index) => (
                 <div key={title} className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-lg bg-jade-50 flex items-center justify-center flex-shrink-0 relative">
                     <Icon size={18} className="text-jade-600" />
                     <span className="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-jade-700 text-white text-[10px] font-bold flex items-center justify-center">
-                      {i + 1}
+                      {index + 1}
                     </span>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900">{title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{description}</p>
                   </div>
                 </div>
               ))}
             </div>
-
-            <div className="mt-8 bg-jade-50 border border-jade-100 rounded-(--radius-card) p-4">
-              <p className="text-sm text-jade-800">
-                Already have an account?{' '}
-                <Link to="/login" className="font-medium underline underline-offset-2">
-                  Sign in here
-                </Link>
-              </p>
-            </div>
           </div>
 
-          {/* Right — form (3/5 width on desktop) */}
           <div className="lg:col-span-3">
-            {/* Mobile-only heading */}
             <div className="md:hidden mb-5 text-center">
               <div className="w-12 h-12 bg-jade-700 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <FileText className="text-white" size={22} />
               </div>
               <h1 className="text-xl font-bold text-gray-900">Apply for an Account</h1>
-              <p className="text-sm text-gray-500 mt-1 max-w-sm mx-auto">
-                Submit your details and our staff will review your application.
-              </p>
+              <p className="text-sm text-gray-500 mt-1">Create your login and submit your company details.</p>
             </div>
 
-            <form ref={formRef} onSubmit={handleSubmit} noValidate>
-              {/* Company Information */}
-              <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 sm:p-6 mb-5">
+            <form onSubmit={handleSubmit} noValidate>
+              <section className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 sm:p-6 mb-5">
                 <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Building2 size={16} className="text-jade-600" />
-                  Company Information
+                  <KeyRound size={16} className="text-jade-600" />Portal Login
                 </h2>
                 <div className="space-y-4">
                   <FormField
-                    id="apply-company"
-                    label="Company / Trading Name"
+                    id="apply-username"
+                    label="Username"
                     required
-                    autoComplete="organization"
-                    placeholder="Pacific Fresh Foods Ltd"
-                    value={form.company}
-                    onChange={(e) => updateField('company', (e.target as HTMLInputElement).value)}
-                    error={errors.company}
-                  />
-                  <FormField
-                    id="apply-nzbn"
-                    label="NZBN"
-                    autoComplete="off"
-                    placeholder="e.g. 9429041234567"
-                    value={form.nzbn}
-                    onChange={(e) => updateField('nzbn', (e.target as HTMLInputElement).value)}
-                    hint="New Zealand Business Number (optional)"
-                    error={errors.nzbn}
-                  />
-                  <FormField
-                    id="apply-address"
-                    label="Business Address"
-                    required
-                    autoComplete="street-address"
-                    placeholder="42 Harbour View Road"
-                    value={form.address}
-                    onChange={(e) => updateField('address', (e.target as HTMLInputElement).value)}
-                    error={errors.address}
-                  />
-                  <FormField
-                    id="apply-suburb"
-                    label="Suburb"
-                    autoComplete="address-level3"
-                    placeholder="e.g. Auckland CBD"
-                    value={form.suburb}
-                    onChange={(e) => updateField('suburb', (e.target as HTMLInputElement).value)}
-                    error={errors.suburb}
+                    autoComplete="username"
+                    maxLength={50}
+                    placeholder="Choose a portal username"
+                    hint="You will use this username to sign in and check your application status."
+                    value={form.userName}
+                    onChange={(event) => updateField('userName', (event.target as HTMLInputElement).value)}
+                    error={errors.userName}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
-                      id="apply-city"
-                      label="City"
+                      id="apply-password"
+                      label="Password"
+                      type={showPassword ? 'text' : 'password'}
                       required
-                      autoComplete="address-level2"
-                      placeholder="Auckland"
-                      value={form.city}
-                      onChange={(e) => updateField('city', (e.target as HTMLInputElement).value)}
-                      error={errors.city}
+                      autoComplete="new-password"
+                      maxLength={128}
+                      hint="At least 8 characters."
+                      value={form.password}
+                      onChange={(event) => updateField('password', (event.target as HTMLInputElement).value)}
+                      error={errors.password}
+                      suffix={passwordToggle}
                     />
                     <FormField
-                      id="apply-postal"
-                      label="Postal Code"
+                      id="apply-confirm-password"
+                      label="Confirm Password"
+                      type={showPassword ? 'text' : 'password'}
                       required
-                      autoComplete="postal-code"
-                      placeholder="1010"
-                      inputMode="numeric"
-                      maxLength={4}
-                      value={form.postalCode}
-                      onChange={(e) => updateField('postalCode', (e.target as HTMLInputElement).value)}
-                      error={errors.postalCode}
+                      autoComplete="new-password"
+                      maxLength={128}
+                      value={form.confirmPassword}
+                      onChange={(event) => updateField('confirmPassword', (event.target as HTMLInputElement).value)}
+                      error={errors.confirmPassword}
                     />
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Primary Contact */}
-              <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 sm:p-6 mb-5">
+              <section className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 sm:p-6 mb-5">
                 <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <User size={16} className="text-jade-600" />
-                  Primary Contact
+                  <Building2 size={16} className="text-jade-600" />Company Information
+                </h2>
+                <FormField
+                  id="apply-company"
+                  label="Company / Trading Name"
+                  required
+                  autoComplete="organization"
+                  maxLength={200}
+                  placeholder="Your registered or trading name"
+                  hint="Jadcup staff will use this together with your email to find the correct customer record."
+                  value={form.registeredBusinessName}
+                  onChange={(event) => updateField('registeredBusinessName', (event.target as HTMLInputElement).value)}
+                  error={errors.registeredBusinessName}
+                />
+              </section>
+
+              <section className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 sm:p-6 mb-5">
+                <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <User size={16} className="text-jade-600" />Primary Contact
                 </h2>
                 <div className="space-y-4">
                   <FormField
@@ -362,137 +326,95 @@ export function ApplyPage() {
                     label="Contact Person"
                     required
                     autoComplete="name"
-                    placeholder="Sarah Chen"
-                    value={form.contactPerson}
-                    onChange={(e) => updateField('contactPerson', (e.target as HTMLInputElement).value)}
-                    error={errors.contactPerson}
-                  />
-                  <FormField
-                    id="apply-email"
-                    label="Work Email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    placeholder="you@company.co.nz"
-                    value={form.email}
-                    onChange={(e) => updateField('email', (e.target as HTMLInputElement).value)}
-                    error={errors.email}
+                    maxLength={60}
+                    value={form.registeredContactName}
+                    onChange={(event) => updateField('registeredContactName', (event.target as HTMLInputElement).value)}
+                    error={errors.registeredContactName}
                   />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      id="apply-email"
+                      label="Work Email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      maxLength={100}
+                      placeholder="you@company.co.nz"
+                      value={form.email}
+                      onChange={(event) => updateField('email', (event.target as HTMLInputElement).value)}
+                      error={errors.email}
+                    />
                     <FormField
                       id="apply-phone"
                       label="Phone"
                       type="tel"
-                      required
                       autoComplete="tel"
                       placeholder="09 555 0123"
                       value={form.phone}
-                      onChange={(e) => updateField('phone', (e.target as HTMLInputElement).value)}
+                      onChange={(event) => updateField('phone', (event.target as HTMLInputElement).value)}
                       error={errors.phone}
                     />
-                    <FormField
-                      id="apply-mobile"
-                      label="Mobile"
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder="021 555 0456"
-                      value={form.mobile}
-                      onChange={(e) => updateField('mobile', (e.target as HTMLInputElement).value)}
-                      hint="Optional"
-                      error={errors.mobile}
-                    />
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Message & Consent */}
-              <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 sm:p-6 mb-5">
+              <section className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 sm:p-6 mb-5">
                 <h2 className="text-base font-semibold text-gray-900 mb-4">Additional Information</h2>
-                <div className="space-y-4">
-                  <div>
-                    <FormField
-                      as="textarea"
-                      id="apply-message"
-                      label="Packaging Requirements or Message"
-                      placeholder="Tell us about the products you're interested in, expected order volumes, or any other details..."
-                      rows={4}
-                      maxLength={MESSAGE_MAX}
-                      value={form.message}
-                      onChange={(e) => updateField('message', (e.target as HTMLTextAreaElement).value)}
-                      error={errors.message}
+                <FormField
+                  as="textarea"
+                  id="apply-notes"
+                  label="Notes for Jadcup Staff"
+                  rows={4}
+                  maxLength={NOTES_MAX}
+                  placeholder="Optional information that may help us identify your existing Jadcup account..."
+                  value={form.notes}
+                  onChange={(event) => updateField('notes', (event.target as HTMLTextAreaElement).value)}
+                  error={errors.notes}
+                />
+                <p className="text-xs mt-1 text-right text-gray-400">{form.notes.length}/{NOTES_MAX}</p>
+
+                <div className="mt-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      id="apply-consent"
+                      type="checkbox"
+                      checked={form.consent}
+                      onChange={(event) => updateField('consent', event.target.checked)}
+                      className="w-4 h-4 mt-0.5 rounded border-gray-300 text-jade-600 focus:ring-jade-500"
+                      aria-invalid={Boolean(errors.consent)}
+                      aria-describedby={errors.consent ? 'apply-consent-error' : undefined}
                     />
-                    <p className={`text-xs mt-1 text-right ${form.message.length > MESSAGE_MAX ? 'text-red-500' : 'text-gray-400'}`}>
-                      {form.message.length}/{MESSAGE_MAX}
-                    </p>
-                  </div>
-
-                  {/* Consent */}
-                  <div>
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input
-                        id="apply-consent"
-                        type="checkbox"
-                        checked={form.consent}
-                        onChange={(e) => updateField('consent', e.target.checked)}
-                        className="w-4 h-4 mt-0.5 rounded border-gray-300 text-jade-600 focus:ring-jade-500"
-                        aria-invalid={errors.consent ? true : undefined}
-                        aria-describedby={errors.consent ? 'apply-consent-error' : undefined}
-                        aria-required="true"
-                      />
-                      <span className="text-sm text-gray-600 leading-snug">
-                        I confirm that the information provided is accurate and agree that Jadcup
-                        may contact me regarding this application.{' '}
-                        <span className="text-jade-700 underline underline-offset-2 cursor-pointer">
-                          Privacy Policy
-                        </span>
-                      </span>
-                    </label>
-                    {errors.consent && (
-                      <p id="apply-consent-error" className="text-xs text-red-600 mt-1.5 ml-7" role="alert">
-                        {errors.consent}
-                      </p>
-                    )}
-                  </div>
+                    <span className="text-sm text-gray-600 leading-snug">
+                      I confirm that the information provided is accurate and agree that Jadcup may contact me about this application.
+                    </span>
+                  </label>
+                  {errors.consent && (
+                    <p id="apply-consent-error" className="text-xs text-red-600 mt-1.5 ml-7" role="alert">{errors.consent}</p>
+                  )}
                 </div>
-              </div>
+              </section>
 
-              {/* Submit */}
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={isSubmitting}
-              >
+              {errors.form && (
+                <div className="mb-5 bg-red-50 border border-red-200 rounded-(--radius-button) p-4" role="alert">
+                  <p className="text-sm text-red-700">{errors.form}</p>
+                </div>
+              )}
+
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    Submitting application...
-                  </>
+                  <><Loader2 size={18} className="animate-spin" />Submitting application...</>
                 ) : (
-                  <>
-                    Submit Application
-                    <ArrowRight size={18} />
-                  </>
+                  <>Submit Application<ArrowRight size={18} /></>
                 )}
               </Button>
 
               <p className="text-xs text-gray-400 text-center mt-3">
-                Submitting this form does not create an active account. Applications are reviewed by Jadcup staff.
+                Submitting creates a pending portal login. Jadcup staff must approve and link it before customer data can be accessed.
               </p>
-
-              {/* Mobile — already have account */}
-              <div className="md:hidden mt-6 pt-5 border-t border-gray-100 text-center">
-                <p className="text-sm text-gray-500">
-                  Already have an account?{' '}
-                  <Link to="/login" className="text-jade-700 font-medium hover:underline">
-                    Sign in
-                  </Link>
-                </p>
-              </div>
             </form>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

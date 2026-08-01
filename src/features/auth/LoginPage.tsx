@@ -1,35 +1,37 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Lock,
+  CreditCard,
   Eye,
   EyeOff,
-  ShoppingBag,
-  CreditCard,
-  Truck,
-  Package,
-  Loader2,
   Info,
+  Loader2,
+  Lock,
+  Package,
+  ShoppingBag,
+  Truck,
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { FormField } from '../../components/ui/FormField';
+import { useAuth } from './AuthContext';
 
 interface LoginErrors {
-  email?: string;
+  userName?: string;
   password?: string;
+  form?: string;
 }
 
-function validateLogin(email: string, password: string): LoginErrors {
+function validateLogin(userName: string, password: string): LoginErrors {
   const errors: LoginErrors = {};
-  if (!email.trim()) {
-    errors.email = 'Email address is required.';
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-    errors.email = 'Please enter a valid email address.';
+  if (!userName.trim()) {
+    errors.userName = 'Username is required.';
+  } else if (userName.trim().length > 50) {
+    errors.userName = 'Username must not exceed 50 characters.';
   }
   if (!password) {
     errors.password = 'Password is required.';
-  } else if (password.length < 6) {
-    errors.password = 'Password must be at least 6 characters.';
+  } else if (password.length > 128) {
+    errors.password = 'Password must not exceed 128 characters.';
   }
   return errors;
 }
@@ -43,8 +45,8 @@ const portalFeatures = [
 
 export function LoginPage() {
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState('');
+  const { session, isInitializing, login } = useAuth();
+  const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -52,44 +54,49 @@ export function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForgotMsg, setShowForgotMsg] = useState(false);
 
+  useEffect(() => {
+    if (isInitializing || !session) return;
+    navigate(
+      session.accountStatus === 'Approved' ? '/dashboard' : '/application-status',
+      { replace: true },
+    );
+  }, [isInitializing, navigate, session]);
+
   const clearFieldError = useCallback((field: keyof LoginErrors) => {
-    setErrors((prev) => {
-      if (!prev[field]) return prev;
-      const next = { ...prev };
-      delete next[field];
-      return next;
+    setErrors((previous) => {
+      if (!previous[field] && !previous.form) return previous;
+      return { ...previous, [field]: undefined, form: undefined };
     });
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setShowForgotMsg(false);
 
-    const validationErrors = validateLogin(email, password);
+    const validationErrors = validateLogin(userName, password);
     setErrors(validationErrors);
-
     if (Object.keys(validationErrors).length > 0) {
-      const firstErrorField = validationErrors.email ? 'login-email' : 'login-password';
-      document.getElementById(firstErrorField)?.focus();
+      document.getElementById(validationErrors.userName ? 'login-username' : 'login-password')?.focus();
       return;
     }
 
     setIsSubmitting(true);
-
-    // --- PROTOTYPE ONLY ---
-    // Simulates a login delay. No credentials are sent or stored.
-    // Must be replaced with real authentication (JWT) before production.
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    navigate('/dashboard');
-    // --- END PROTOTYPE ONLY ---
+    try {
+      const accountStatus = await login(userName.trim(), password, rememberMe);
+      navigate(accountStatus === 'Approved' ? '/dashboard' : '/application-status', { replace: true });
+    } catch (error) {
+      setErrors({
+        form: error instanceof Error ? error.message : 'Unable to sign in. Please try again.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="flex-1 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-14">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
-
-          {/* Left — branding & info (hidden on small mobile, shown from md) */}
           <div className="hidden md:block lg:py-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-jade-700 rounded-xl flex items-center justify-center">
@@ -102,8 +109,8 @@ export function LoginPage() {
             </div>
 
             <p className="text-gray-600 leading-relaxed mb-8">
-              Access your Jadcup customer portal to manage your orders and account.
-              The portal is available to approved customers with an activated account.
+              Approved customers can access their Jadcup account and order information.
+              Applicants can also sign in to check the progress of their application.
             </p>
 
             <div className="space-y-4 mb-8">
@@ -120,20 +127,18 @@ export function LoginPage() {
             <div className="bg-jade-50 border border-jade-100 rounded-(--radius-card) p-4">
               <p className="text-sm text-jade-800 flex items-start gap-2">
                 <Info size={16} className="flex-shrink-0 mt-0.5" />
-                Customer Portal access is available after your account application has been reviewed and activated by Jadcup staff.
+                Your username is created when you submit the Customer Portal application.
               </p>
             </div>
           </div>
 
-          {/* Right — login form */}
           <div>
-            {/* Mobile-only heading */}
             <div className="md:hidden mb-6 text-center">
               <div className="w-12 h-12 bg-jade-700 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Lock className="text-white" size={22} />
               </div>
               <h1 className="text-xl font-bold text-gray-900">Customer Login</h1>
-              <p className="text-sm text-gray-500 mt-1">Sign in to your Jadcup account</p>
+              <p className="text-sm text-gray-500 mt-1">Sign in with your portal username</p>
             </div>
 
             <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-6 sm:p-8">
@@ -142,18 +147,18 @@ export function LoginPage() {
               <form onSubmit={handleSubmit} noValidate>
                 <div className="space-y-4">
                   <FormField
-                    id="login-email"
-                    label="Email Address"
-                    type="email"
+                    id="login-username"
+                    label="Username"
                     required
-                    autoComplete="email"
-                    placeholder="you@company.co.nz"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail((e.target as HTMLInputElement).value);
-                      clearFieldError('email');
+                    autoComplete="username"
+                    maxLength={50}
+                    placeholder="Enter your portal username"
+                    value={userName}
+                    onChange={(event) => {
+                      setUserName((event.target as HTMLInputElement).value);
+                      clearFieldError('userName');
                     }}
-                    error={errors.email}
+                    error={errors.userName}
                   />
 
                   <FormField
@@ -162,23 +167,24 @@ export function LoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     required
                     autoComplete="current-password"
+                    maxLength={128}
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => {
-                      setPassword((e.target as HTMLInputElement).value);
+                    onChange={(event) => {
+                      setPassword((event.target as HTMLInputElement).value);
                       clearFieldError('password');
                     }}
                     error={errors.password}
-                    suffix={
+                    suffix={(
                       <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
+                        onClick={() => setShowPassword((visible) => !visible)}
                         className="p-2 text-gray-400 hover:text-gray-600 rounded"
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
-                    }
+                    )}
                   />
 
                   <div className="flex items-center justify-between">
@@ -186,10 +192,10 @@ export function LoginPage() {
                       <input
                         type="checkbox"
                         checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
+                        onChange={(event) => setRememberMe(event.target.checked)}
                         className="w-4 h-4 rounded border-gray-300 text-jade-600 focus:ring-jade-500"
                       />
-                      <span className="text-sm text-gray-600">Remember me</span>
+                      <span className="text-sm text-gray-600">Keep me signed in</span>
                     </label>
                     <button
                       type="button"
@@ -201,43 +207,26 @@ export function LoginPage() {
                   </div>
                 </div>
 
+                {errors.form && (
+                  <div className="mt-4 bg-red-50 border border-red-200 rounded-(--radius-button) p-3" role="alert">
+                    <p className="text-sm text-red-700">{errors.form}</p>
+                  </div>
+                )}
+
                 {showForgotMsg && (
-                  <div
-                    className="mt-4 bg-amber-50 border border-amber-200 rounded-(--radius-button) p-3"
-                    role="status"
-                    aria-live="polite"
-                  >
+                  <div className="mt-4 bg-amber-50 border border-amber-200 rounded-(--radius-button) p-3" role="status">
                     <p className="text-sm text-amber-800">
-                      Password reset will be available once the account service is connected.
-                      Please contact Jadcup support if you need assistance.
+                      Password reset is not available yet. Please contact Jadcup support for assistance.
                     </p>
                   </div>
                 )}
 
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full mt-6"
-                  disabled={isSubmitting}
-                >
+                <Button type="submit" size="lg" className="w-full mt-6" disabled={isSubmitting}>
                   {isSubmitting ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    'Log In'
-                  )}
+                    <><Loader2 size={18} className="animate-spin" />Signing in...</>
+                  ) : 'Log In'}
                 </Button>
               </form>
-
-              {/* Mobile-only notice */}
-              <div className="md:hidden mt-5 bg-jade-50 border border-jade-100 rounded-(--radius-button) p-3">
-                <p className="text-xs text-jade-700 flex items-start gap-1.5">
-                  <Info size={13} className="flex-shrink-0 mt-0.5" />
-                  Portal access is available after your application has been reviewed and activated by Jadcup staff.
-                </p>
-              </div>
 
               <div className="mt-6 pt-5 border-t border-gray-100 text-center space-y-3">
                 <p className="text-sm text-gray-500">
