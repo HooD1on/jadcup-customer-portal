@@ -10,12 +10,20 @@ import { DemoPage } from '../features/demo/DemoPage';
 import { NotFoundPage } from '../features/NotFoundPage';
 import { ApplicationStatusPage } from '../features/auth/ApplicationStatusPage';
 import { RequireApprovedAccount, RequirePortalSession } from '../features/auth/RouteGuards';
+import { PackagingFinderPage } from '../features/start/PackagingFinderPage';
+import { ProductExplorerPage } from '../features/products/ProductExplorerPage';
+import { SampleRequestPage } from '../features/sample/SampleRequestPage';
+import { HelpPage } from '../features/help/HelpPage';
 
 export const router = createBrowserRouter([
   {
     element: <PublicLayout />,
     children: [
       { path: '/', element: <HomePage /> },
+      { path: '/start', element: <PackagingFinderPage /> },
+      { path: '/products', element: <ProductExplorerPage /> },
+      { path: '/sample', element: <SampleRequestPage /> },
+      { path: '/help', element: <HelpPage /> },
       { path: '/login', element: <LoginPage /> },
       { path: '/apply', element: <ApplyPage /> },
       {

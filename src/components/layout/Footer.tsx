@@ -1,55 +1,26 @@
+import { LifeBuoy, Mail, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 export function Footer() {
   return (
-    <footer className="bg-jade-950 text-jade-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-jade-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">J</span>
-              </div>
-              <span className="text-xl font-bold text-white tracking-tight">Jadcup</span>
-            </div>
-            <p className="text-sm text-jade-300 leading-relaxed">
-              Premium custom packaging solutions for New Zealand businesses.
-            </p>
-          </div>
-
-          {/* Products */}
+    <footer className="border-t border-stone-200 bg-white">
+      <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h4 className="text-sm font-semibold text-white mb-3">Products</h4>
-            <ul className="space-y-2 list-none p-0 m-0">
-              <li><span className="text-sm text-jade-300 hover:text-white cursor-pointer">Custom Cups</span></li>
-              <li><span className="text-sm text-jade-300 hover:text-white cursor-pointer">Food Packaging</span></li>
-              <li><span className="text-sm text-jade-300 hover:text-white cursor-pointer">Corrugated Boxes</span></li>
-              <li><span className="text-sm text-jade-300 hover:text-white cursor-pointer">Accessories</span></li>
-            </ul>
+            <p className="text-sm font-bold text-jade-950">Jadcup Customer Portal</p>
+            <p className="mt-1 text-xs text-stone-500">Explore as a new customer or manage an existing Jadcup relationship.</p>
           </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="text-sm font-semibold text-white mb-3">Company</h4>
-            <ul className="space-y-2 list-none p-0 m-0">
-              <li><span className="text-sm text-jade-300 hover:text-white cursor-pointer">About Us</span></li>
-              <li><span className="text-sm text-jade-300 hover:text-white cursor-pointer">Contact Sales</span></li>
-              <li><span className="text-sm text-jade-300 hover:text-white cursor-pointer">Customer Portal</span></li>
-            </ul>
+          <nav className="flex flex-wrap gap-x-5 gap-y-3 text-sm" aria-label="Footer navigation">
+            <Link to="/start" className="font-semibold text-stone-600 no-underline hover:text-jade-900">New customer</Link>
+            <Link to="/login" className="font-semibold text-stone-600 no-underline hover:text-jade-900">Customer sign in</Link>
+            <Link to="/apply" className="font-semibold text-stone-600 no-underline hover:text-jade-900">Portal access</Link>
+            <Link to="/help" className="inline-flex items-center gap-1.5 font-semibold text-stone-600 no-underline hover:text-jade-900"><LifeBuoy size={14} />Help</Link>
+            <a href="https://jadcup.co.nz/" target="_blank" rel="noreferrer" className="font-semibold text-stone-500 no-underline hover:text-jade-900">Jadcup website</a>
+          </nav>
+          <div className="flex flex-wrap gap-4 text-xs text-stone-500">
+            <a href="tel:+6492823988" className="inline-flex items-center gap-1.5 text-stone-500 no-underline hover:text-jade-900"><Phone size={13} />09 282 3988</a>
+            <a href="mailto:Info@jadcup.co.nz" className="inline-flex items-center gap-1.5 text-stone-500 no-underline hover:text-jade-900"><Mail size={13} />Info@jadcup.co.nz</a>
           </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-sm font-semibold text-white mb-3">Contact</h4>
-            <ul className="space-y-2 list-none p-0 m-0">
-              <li className="text-sm text-jade-300">Auckland, New Zealand</li>
-              <li className="text-sm text-jade-300">sales@jadcup.co.nz</li>
-              <li className="text-sm text-jade-300">09 555 0100</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-jade-800 mt-10 pt-6 text-center">
-          <p className="text-xs text-jade-400">&copy; 2026 Jadcup. All rights reserved.</p>
         </div>
       </div>
     </footer>
