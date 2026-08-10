@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X } from 'lucide-react';
+import { ArrowUpRight, LogOut, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../../features/auth/AuthContext';
 
@@ -33,10 +33,9 @@ export function PublicHeader() {
               </>
             ) : (
               <>
-                <Link to="/start" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Packaging finder</Link>
-                <Link to="/products" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Products</Link>
-                <Link to="/sample" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Samples &amp; quote</Link>
+                <Link to="/start" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">New customer workspace</Link>
                 <Link to="/help" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Help</Link>
+                <a href="https://jadcup.co.nz/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-500 no-underline hover:text-jade-900">Jadcup website <ArrowUpRight size={13} /></a>
               </>
             )}
           </nav>
@@ -82,9 +81,8 @@ export function PublicHeader() {
               </>
             ) : (
               <>
-                <Link to="/start" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Packaging finder</Link>
-                <Link to="/products" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Products</Link>
-                <Link to="/sample" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Samples &amp; quote</Link>
+                <Link to="/start" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>New customer workspace</Link>
+                <a href="https://jadcup.co.nz/" target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white">Jadcup website <ArrowUpRight size={14} /></a>
               </>
             )}
             <Link to="/help" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Help</Link>

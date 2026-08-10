@@ -11,10 +11,11 @@ export function Footer() {
             <p className="mt-1 text-xs text-stone-500">Explore as a new customer or manage an existing Jadcup relationship.</p>
           </div>
           <nav className="flex flex-wrap gap-x-5 gap-y-3 text-sm" aria-label="Footer navigation">
-            <Link to="/start" className="font-semibold text-stone-600 no-underline hover:text-jade-900">Packaging finder</Link>
-            <Link to="/products" className="font-semibold text-stone-600 no-underline hover:text-jade-900">Products</Link>
-            <Link to="/sample" className="font-semibold text-stone-600 no-underline hover:text-jade-900">Samples &amp; quote</Link>
+            <Link to="/start" className="font-semibold text-stone-600 no-underline hover:text-jade-900">New customer</Link>
+            <Link to="/login" className="font-semibold text-stone-600 no-underline hover:text-jade-900">Customer sign in</Link>
+            <Link to="/apply" className="font-semibold text-stone-600 no-underline hover:text-jade-900">Portal access</Link>
             <Link to="/help" className="inline-flex items-center gap-1.5 font-semibold text-stone-600 no-underline hover:text-jade-900"><LifeBuoy size={14} />Help</Link>
+            <a href="https://jadcup.co.nz/" target="_blank" rel="noreferrer" className="font-semibold text-stone-500 no-underline hover:text-jade-900">Jadcup website</a>
           </nav>
           <div className="flex flex-wrap gap-4 text-xs text-stone-500">
             <a href="tel:+6492823988" className="inline-flex items-center gap-1.5 text-stone-500 no-underline hover:text-jade-900"><Phone size={13} />09 282 3988</a>
