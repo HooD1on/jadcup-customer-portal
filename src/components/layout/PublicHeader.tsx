@@ -25,10 +25,20 @@ export function PublicHeader() {
           <Logo />
 
           <nav className="hidden lg:flex items-center gap-7" aria-label="Main navigation">
-            <a href="/#solutions" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Solutions</a>
-            <a href="/#products" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Products</a>
-            <a href="/#why-jadcup" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Why Jadcup</a>
-            <a href="/#customer-proof" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Customer proof</a>
+            {session?.accountStatus === 'Approved' ? (
+              <>
+                <Link to="/dashboard" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Dashboard</Link>
+                <Link to="/orders" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Orders</Link>
+                <Link to="/help" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Help</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/start" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Packaging finder</Link>
+                <Link to="/products" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Products</Link>
+                <Link to="/sample" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Samples &amp; quote</Link>
+                <Link to="/help" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Help</Link>
+              </>
+            )}
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
@@ -65,10 +75,19 @@ export function PublicHeader() {
         <nav className="md:hidden border-t border-stone-200 bg-stone-50 px-4 py-5" aria-label="Mobile navigation">
           <div className="space-y-1">
             <Link to="/" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Home</Link>
-            <a href="/#solutions" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Solutions</a>
-            <a href="/#products" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Products</a>
-            <a href="/#why-jadcup" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Why Jadcup</a>
-            <a href="/#customer-proof" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Customer proof</a>
+            {session?.accountStatus === 'Approved' ? (
+              <>
+                <Link to="/dashboard" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+                <Link to="/orders" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Orders</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/start" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Packaging finder</Link>
+                <Link to="/products" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Products</Link>
+                <Link to="/sample" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Samples &amp; quote</Link>
+              </>
+            )}
+            <Link to="/help" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Help</Link>
           </div>
           <div className="mt-4 border-t border-stone-200 pt-4 space-y-2">
             {session ? (
