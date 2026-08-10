@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, LogOut, Menu, X } from 'lucide-react';
+import { LogOut, Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../../features/auth/AuthContext';
 
@@ -25,11 +25,10 @@ export function PublicHeader() {
           <Logo />
 
           <nav className="hidden lg:flex items-center gap-7" aria-label="Main navigation">
-            <Link to="/" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Home</Link>
-            <Link to="/#new-customers" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">New customers</Link>
-            <a href="https://jadcup.co.nz/our-products/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">
-              Products <ArrowUpRight size={13} />
-            </a>
+            <a href="/#solutions" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Solutions</a>
+            <a href="/#products" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Products</a>
+            <a href="/#why-jadcup" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Why Jadcup</a>
+            <a href="/#customer-proof" className="text-sm font-semibold text-stone-600 no-underline hover:text-jade-900">Customer proof</a>
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
@@ -66,8 +65,10 @@ export function PublicHeader() {
         <nav className="md:hidden border-t border-stone-200 bg-stone-50 px-4 py-5" aria-label="Mobile navigation">
           <div className="space-y-1">
             <Link to="/" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Home</Link>
-            <Link to="/#new-customers" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>New customers</Link>
-            <a href="https://jadcup.co.nz/our-products/" target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white">Products <ArrowUpRight size={15} /></a>
+            <a href="/#solutions" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Solutions</a>
+            <a href="/#products" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Products</a>
+            <a href="/#why-jadcup" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Why Jadcup</a>
+            <a href="/#customer-proof" className="block rounded-xl px-3 py-3 text-sm font-semibold text-stone-700 no-underline hover:bg-white" onClick={() => setMobileOpen(false)}>Customer proof</a>
           </div>
           <div className="mt-4 border-t border-stone-200 pt-4 space-y-2">
             {session ? (
