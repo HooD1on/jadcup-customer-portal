@@ -141,69 +141,72 @@ export function IndustryInsights() {
           </p>
         </div>
 
-        <div className="mt-9 grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
-          <article className="relative overflow-hidden rounded-[2rem] bg-jade-950 p-7 text-white shadow-lg sm:p-9">
-            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full border-[28px] border-lime-300/10" aria-hidden="true" />
-            <div className="relative">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.13em]">
-                <span className="inline-flex items-center gap-2 rounded-full bg-lime-300 px-3 py-1.5 text-jade-950">
-                  <FeaturedIcon size={14} /> {t(featuredInsight.category, featuredInsight.categoryZh)}
-                </span>
-                <span className="text-jade-100/55">{t(featuredInsight.date, featuredInsight.dateZh)}</span>
-              </div>
-
-              <p className="mt-7 text-sm font-semibold text-lime-300">{featuredInsight.source}</p>
-              <h3 className="mt-3 max-w-xl text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl">
-                {t(featuredInsight.title, featuredInsight.titleZh)}
-              </h3>
-              <p className="mt-5 max-w-2xl text-sm leading-7 text-jade-100/70 sm:text-base">
-                {t(featuredInsight.summary, featuredInsight.summaryZh)}
-              </p>
-
-              <figure className="relative mt-7 overflow-hidden rounded-[1.5rem] border border-white/10 bg-jade-900">
+        <div className="mt-9">
+          <article className="relative overflow-hidden rounded-[2rem] bg-jade-950 text-white shadow-lg">
+            <div className="absolute -right-16 -top-16 z-10 h-48 w-48 rounded-full border-[28px] border-lime-300/10" aria-hidden="true" />
+            <div className="grid lg:min-h-[34rem] lg:grid-cols-[0.94fr_1.06fr]">
+              <figure className="relative min-h-72 overflow-hidden bg-jade-900 sm:min-h-96 lg:min-h-full">
                 <img
                   src={featuredInsight.image}
                   alt={t(featuredInsight.imageAlt, featuredInsight.imageAltZh)}
-                  className="aspect-video w-full object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                   loading="lazy"
                   decoding="async"
                 />
-                <figcaption className="absolute bottom-3 right-3 rounded-full bg-jade-950/85 px-3 py-1.5 text-[0.65rem] font-bold text-white backdrop-blur-sm">
+                <div className="absolute inset-0 bg-gradient-to-t from-jade-950/45 via-transparent to-transparent" aria-hidden="true" />
+                <figcaption className="absolute bottom-4 left-4 rounded-full bg-jade-950/85 px-3 py-1.5 text-[0.65rem] font-bold text-white backdrop-blur-sm">
                   {t('Image', '图片')} · {featuredInsight.source}
                 </figcaption>
               </figure>
 
-              <div className="mt-7 rounded-2xl border border-white/10 bg-white/7 p-5">
-                <p className="text-xs font-black uppercase tracking-[0.14em] text-lime-300">
-                  {t('What this could mean for your business', '这对您的业务可能意味着什么')}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-jade-50/85">
-                  {t(featuredInsight.takeaway, featuredInsight.takeawayZh)}
-                </p>
-              </div>
+              <div className="relative flex flex-col p-7 sm:p-9 lg:p-10">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-[0.13em]">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-lime-300 px-3 py-1.5 text-jade-950">
+                    <FeaturedIcon size={14} /> {t(featuredInsight.category, featuredInsight.categoryZh)}
+                  </span>
+                  <span className="text-jade-100/55">{t(featuredInsight.date, featuredInsight.dateZh)}</span>
+                </div>
 
-              <a
-                href={featuredInsight.href}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-white no-underline transition hover:text-lime-300"
-              >
-                {t('Read the original article', '阅读原文')} <ArrowUpRight size={16} />
-              </a>
+                <p className="mt-7 text-sm font-semibold text-lime-300">{featuredInsight.source}</p>
+                <h3 className="mt-3 max-w-xl text-3xl font-semibold leading-tight tracking-[-0.035em] sm:text-4xl">
+                  {t(featuredInsight.title, featuredInsight.titleZh)}
+                </h3>
+                <p className="mt-5 max-w-2xl text-sm leading-7 text-jade-100/70 sm:text-base">
+                  {t(featuredInsight.summary, featuredInsight.summaryZh)}
+                </p>
+
+                <div className="mt-7 rounded-2xl border border-white/10 bg-white/7 p-5">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-lime-300">
+                    {t('What this could mean for your business', '这对您的业务可能意味着什么')}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-jade-50/85">
+                    {t(featuredInsight.takeaway, featuredInsight.takeawayZh)}
+                  </p>
+                </div>
+
+                <a
+                  href={featuredInsight.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-7 inline-flex items-center gap-2 self-start text-sm font-bold text-white no-underline transition hover:text-lime-300"
+                >
+                  {t('Read the original article', '阅读原文')} <ArrowUpRight size={16} />
+                </a>
+              </div>
             </div>
           </article>
 
-          <div className="grid gap-4">
+          <div className="mt-5 grid gap-4 md:grid-cols-3">
             {supportingInsights.map((article) => {
               const Icon = article.icon;
 
               return (
-                <article key={article.href} className="group rounded-[1.5rem] border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-jade-200 hover:shadow-md sm:p-6">
+                <article key={article.href} className="group flex h-full flex-col rounded-[1.5rem] border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-jade-200 hover:shadow-md sm:p-6">
                   <figure className="relative mb-5 overflow-hidden rounded-2xl bg-stone-100">
                     <img
                       src={article.image}
                       alt={t(article.imageAlt, article.imageAltZh)}
-                      className="aspect-[16/7] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                      className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
                       loading="lazy"
                       decoding="async"
                     />
@@ -238,7 +241,7 @@ export function IndustryInsights() {
                     target="_blank"
                     rel="noreferrer"
                     aria-label={t(`Read original article from ${article.source}`, `阅读${article.source}原文`)}
-                    className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-jade-800 no-underline transition group-hover:text-jade-600"
+                    className="mt-auto inline-flex items-center gap-2 pt-5 text-xs font-bold text-jade-800 no-underline transition group-hover:text-jade-600"
                   >
                     {t('Original source', '原始来源')} <ArrowUpRight size={14} />
                   </a>
