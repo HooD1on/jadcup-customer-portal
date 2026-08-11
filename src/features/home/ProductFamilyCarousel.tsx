@@ -9,6 +9,8 @@ import {
   Coffee,
   CupSoda,
   IceCreamBowl,
+  Pause,
+  Play,
   ScrollText,
   ShieldCheck,
   ShoppingBag,
@@ -134,6 +136,10 @@ export function ProductFamilyCarousel() {
   const [products, setProducts] = useState<ShowcaseProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [autoplayPaused, setAutoplayPaused] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+  const [pointerInside, setPointerInside] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
@@ -141,6 +147,14 @@ export function ProductFamilyCarousel() {
     getShowcaseProducts(controller.signal).then(setProducts).finally(() => setLoading(false));
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (autoplayPaused || pointerInside || document.hidden) return;
+    const timer = window.setTimeout(() => {
+      setCarouselIndex((current) => (current + 1) % productFamilyShowcase.length);
+    }, 6500);
+    return () => window.clearTimeout(timer);
+  }, [autoplayPaused, carouselIndex, pointerInside]);
 
   const activeFamily = productFamilyShowcase[carouselIndex];
   const ActiveFamilyIcon = activeFamily.icon;
@@ -175,6 +189,8 @@ export function ProductFamilyCarousel() {
       <div
         className="mt-7 overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-sm"
         aria-live="polite"
+        onMouseEnter={() => setPointerInside(true)}
+        onMouseLeave={() => setPointerInside(false)}
         onTouchStart={(event) => { touchStartX.current = event.touches[0]?.clientX ?? null; }}
         onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)}
         onTouchCancel={() => { touchStartX.current = null; }}
@@ -228,11 +244,20 @@ export function ProductFamilyCarousel() {
           <div className="flex items-center gap-2">
             <button type="button" onClick={showPreviousFamily} aria-label={t('Previous product family', '上一个产品类型')} className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-300 text-jade-900 hover:border-jade-500"><ChevronLeft size={18} /></button>
             <button type="button" onClick={showNextFamily} aria-label={t('Next product family', '下一个产品类型')} className="flex h-10 w-10 items-center justify-center rounded-full bg-jade-950 text-white"><ChevronRight size={18} /></button>
+            <button
+              type="button"
+              onClick={() => setAutoplayPaused((paused) => !paused)}
+              aria-pressed={autoplayPaused}
+              className="ml-1 inline-flex h-10 items-center gap-2 rounded-full border border-stone-300 px-3 text-xs font-bold text-stone-600 transition hover:border-jade-500 hover:text-jade-900"
+            >
+              {autoplayPaused ? <Play size={14} /> : <Pause size={14} />}
+              {autoplayPaused ? t('Play', '播放') : t('Pause', '暂停')}
+            </button>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2" aria-label={t('Choose product family slide', '选择产品类型页')}>
             {productFamilyShowcase.map((family, index) => <button key={family.family} type="button" onClick={() => setCarouselIndex(index)} aria-label={t(family.title, family.titleZh)} aria-current={index === carouselIndex ? 'true' : undefined} className={`h-2.5 rounded-full transition ${index === carouselIndex ? 'w-8 bg-jade-900' : 'w-2.5 bg-stone-300 hover:bg-jade-300'}`} />)}
           </div>
-          <p className="hidden items-center gap-2 text-xs font-semibold text-stone-400 sm:flex"><ArrowLeft size={13} />{t('Swipe or use arrows', '滑动或使用箭头')}<ArrowRight size={13} /></p>
+          <p className="hidden items-center gap-2 text-xs font-semibold text-stone-400 sm:flex"><ArrowLeft size={13} />{t('Auto-rotates · swipe or use arrows', '自动轮转 · 可滑动或使用箭头')}<ArrowRight size={13} /></p>
         </div>
       </div>
     </section>

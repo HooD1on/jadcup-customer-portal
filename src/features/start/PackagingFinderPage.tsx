@@ -227,6 +227,7 @@ const emptyFinder: FinderState = { business: '', need: '', route: '' };
 const FINDER_KEY = 'jadcup.portal.packaging-finder';
 
 function packagingChoicesForBusiness(business: string): FinderChoice[] {
+  if (!business) return Object.values(packagingCatalog);
   return (packagingByBusiness[business] || []).map((value) => packagingCatalog[value]).filter(Boolean);
 }
 
@@ -362,6 +363,10 @@ export function PackagingFinderPage() {
     localStorage.removeItem(FINDER_KEY);
   };
 
+  const goBack = () => {
+    setStep((currentStep) => Math.max(0, currentStep - 1));
+  };
+
   if (step === 3) {
     const query = new URLSearchParams({
       business: finder.business,
@@ -382,7 +387,7 @@ export function PackagingFinderPage() {
     return (
       <main className="flex-1 bg-stone-50">
         <div className="max-w-5xl mx-auto px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-          <button type="button" onClick={() => setStep(2)} className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 hover:text-jade-900"><ArrowLeft size={15} />{t('Change an answer', '修改答案')}</button>
+          <button type="button" onClick={() => setStep(2)} className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:border-jade-400 hover:text-jade-900"><ArrowLeft size={15} />{t('Back to decision options', '返回上一级决策选项')}</button>
           <div className="mt-6 overflow-hidden rounded-[2rem] border border-stone-200 bg-white">
             <div className="bg-jade-950 p-8 text-white sm:p-10 lg:p-12">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-lime-300 text-jade-950"><PackageCheck size={23} /></div>
@@ -423,7 +428,11 @@ export function PackagingFinderPage() {
     <main className="flex-1 bg-stone-50">
       <div className="max-w-5xl mx-auto px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <div className="flex items-center justify-between gap-5">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 no-underline hover:text-jade-900"><ArrowLeft size={15} />{t('Customer home', '客户首页')}</Link>
+          {step > 0 ? (
+            <button type="button" onClick={goBack} className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-stone-600 transition hover:border-jade-400 hover:text-jade-900"><ArrowLeft size={15} />{t('Back to previous options', '返回上一级选项')}</button>
+          ) : (
+            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-stone-600 no-underline hover:text-jade-900"><ArrowLeft size={15} />{t('Customer home', '客户首页')}</Link>
+          )}
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400">{t('About one minute', '大约一分钟')}</p>
         </div>
         <div className="mt-6 grid grid-cols-3 gap-2" aria-label={t(`Step ${step + 1} of 3`, `第 ${step + 1} 步，共 3 步`)}>
@@ -463,7 +472,7 @@ export function PackagingFinderPage() {
         </div>
 
         <div className="mt-9 flex items-center justify-between gap-4 border-t border-stone-200 pt-6">
-          <button type="button" onClick={() => setStep((currentStep) => Math.max(0, currentStep - 1))} disabled={step === 0} className="inline-flex items-center gap-2 px-3 py-3 text-sm font-semibold text-stone-600 disabled:invisible"><ArrowLeft size={15} />{t('Back', '返回')}</button>
+          <button type="button" onClick={goBack} disabled={step === 0} className="inline-flex items-center gap-2 px-3 py-3 text-sm font-semibold text-stone-600 disabled:invisible"><ArrowLeft size={15} />{t('Previous step', '上一步')}</button>
           <button type="button" onClick={() => setStep((currentStep) => currentStep + 1)} disabled={!selected} className="inline-flex items-center gap-2 rounded-full bg-jade-900 px-6 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">{step === 2 ? t('See my starting route', '查看我的起始方案') : t('Continue', '继续')} <ArrowRight size={16} /></button>
         </div>
       </div>
