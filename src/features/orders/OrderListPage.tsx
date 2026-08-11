@@ -9,20 +9,30 @@ import { EmptyState } from '../../components/feedback/EmptyState';
 import { mockOrders, orderProductNames } from '../../mocks/data';
 import { formatCurrency, formatDate } from '../../lib/format';
 import { ORDER_STATUS_LABELS } from '../../types';
+import { useLanguage } from '../language/LanguageContext';
 
 const PAGE_SIZE = 5;
 
-const statusOptions: { value: string; label: string }[] = [
-  { value: '', label: 'All Statuses' },
-  ...Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => ({ value, label })),
-];
+const statusLabelsZh: Record<string, string> = {
+  pending: '待确认', confirmed: '已确认', 'in-production': '生产中',
+  'ready-to-ship': '待发货', shipped: '已发货', delivered: '已送达', cancelled: '已取消',
+};
 
 export function OrderListPage() {
+  const { language, t } = useLanguage();
+  const locale = language === 'zh' ? 'zh-CN' : 'en-NZ';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
+  const statusOptions: { value: string; label: string }[] = [
+    { value: '', label: t('All Statuses', '全部状态') },
+    ...Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => ({
+      value,
+      label: language === 'zh' ? statusLabelsZh[value] : label,
+    })),
+  ];
 
   const filtered = useMemo(() => {
     return mockOrders.filter((o) => {
@@ -56,9 +66,9 @@ export function OrderListPage() {
     <PageShell>
       {/* Page header */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Orders</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('My Orders', '我的订单')}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          {filtered.length} order{filtered.length !== 1 ? 's' : ''}
+          {language === 'zh' ? `共 ${filtered.length} 个订单` : `${filtered.length} order${filtered.length !== 1 ? 's' : ''}`}
         </p>
       </div>
 
@@ -70,11 +80,11 @@ export function OrderListPage() {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search order, PO or product..."
+              placeholder={t('Search order, PO or product...', '搜索订单、采购单或产品……')}
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
-              aria-label="Search orders"
+              aria-label={t('Search orders', '搜索订单')}
             />
           </div>
 
@@ -85,7 +95,7 @@ export function OrderListPage() {
               value={statusFilter}
               onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none appearance-none bg-white"
-              aria-label="Filter by status"
+              aria-label={t('Filter by status', '按状态筛选')}
             >
               {statusOptions.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -99,7 +109,7 @@ export function OrderListPage() {
             value={dateFrom}
             onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
             className="w-full px-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
-            aria-label="From date"
+            aria-label={t('From date', '开始日期')}
           />
 
           {/* Date to */}
@@ -108,7 +118,7 @@ export function OrderListPage() {
             value={dateTo}
             onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
             className="w-full px-3 py-2 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none"
-            aria-label="To date"
+            aria-label={t('To date', '结束日期')}
           />
         </div>
       </div>
@@ -116,11 +126,11 @@ export function OrderListPage() {
       {/* Content */}
       {filtered.length === 0 && (
         <EmptyState
-          title="No orders found"
-          description="No orders match your current filters."
+          title={t('No orders found', '未找到订单')}
+          description={t('No orders match your current filters.', '没有订单符合当前筛选条件。')}
           action={
             <Button variant="outline" onClick={clearFilters}>
-              Clear Filters
+              {t('Clear Filters', '清除筛选')}
             </Button>
           }
         />
@@ -133,13 +143,13 @@ export function OrderListPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Your Ref</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Order Date</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Required</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                  <th className="px-5 py-3"><span className="sr-only">View</span></th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('Order', '订单')}</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('Your Ref', '您的参考号')}</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('Order Date', '下单日期')}</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('Required', '要求日期')}</th>
+                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('Status', '状态')}</th>
+                  <th className="text-right px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">{t('Total', '总计')}</th>
+                  <th className="px-5 py-3"><span className="sr-only">{t('View', '查看')}</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -150,21 +160,21 @@ export function OrderListPage() {
                         <ProductImage src={order.firstProductImage} alt={order.orderNo} size="sm" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{order.orderNo}</p>
-                          <p className="text-xs text-gray-500">{order.itemCount} item{order.itemCount !== 1 ? 's' : ''}</p>
+                          <p className="text-xs text-gray-500">{language === 'zh' ? `${order.itemCount} 项产品` : `${order.itemCount} item${order.itemCount !== 1 ? 's' : ''}`}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-600">{order.custOrderNo || '\u2014'}</td>
-                    <td className="px-5 py-4 text-sm text-gray-600">{formatDate(order.orderDate)}</td>
-                    <td className="px-5 py-4 text-sm text-gray-600">{formatDate(order.requiredDate)}</td>
+                    <td className="px-5 py-4 text-sm text-gray-600">{formatDate(order.orderDate, locale)}</td>
+                    <td className="px-5 py-4 text-sm text-gray-600">{formatDate(order.requiredDate, locale)}</td>
                     <td className="px-5 py-4"><StatusBadge status={order.status} /></td>
                     <td className="px-5 py-4 text-sm font-medium text-gray-900 text-right">
-                      {formatCurrency(order.priceInclGst)}
+                      {formatCurrency(order.priceInclGst, locale)}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <Link to={`/orders/${order.orderId}`} className="no-underline">
                         <Button variant="ghost" size="sm">
-                          View <ArrowRight size={14} />
+                          {t('View', '查看')} <ArrowRight size={14} />
                         </Button>
                       </Link>
                     </td>
@@ -190,18 +200,18 @@ export function OrderListPage() {
                       <StatusBadge status={order.status} />
                     </div>
                     {order.custOrderNo && (
-                      <p className="text-xs text-gray-500 mb-1">Ref: {order.custOrderNo}</p>
+                      <p className="text-xs text-gray-500 mb-1">{t('Ref', '参考号')}: {order.custOrderNo}</p>
                     )}
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mt-2">
-                      <span>Ordered: {formatDate(order.orderDate)}</span>
-                      <span>Required: {formatDate(order.requiredDate)}</span>
+                      <span>{t('Ordered', '下单日期')}: {formatDate(order.orderDate, locale)}</span>
+                      <span>{t('Required', '要求日期')}: {formatDate(order.requiredDate, locale)}</span>
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
                       <span className="text-sm font-semibold text-gray-900">
-                        {formatCurrency(order.priceInclGst)}
+                        {formatCurrency(order.priceInclGst, locale)}
                       </span>
                       <span className="text-xs text-jade-600 font-medium flex items-center gap-1">
-                        View Order <ArrowRight size={12} />
+                        {t('View Order', '查看订单')} <ArrowRight size={12} />
                       </span>
                     </div>
                   </div>
@@ -219,10 +229,10 @@ export function OrderListPage() {
                 disabled={page === 1}
                 onClick={() => setPage(page - 1)}
               >
-                <ChevronLeft size={16} /> Previous
+                <ChevronLeft size={16} /> {t('Previous', '上一页')}
               </Button>
               <span className="text-sm text-gray-600">
-                Page {page} of {totalPages}
+                {language === 'zh' ? `第 ${page} 页，共 ${totalPages} 页` : `Page ${page} of ${totalPages}`}
               </span>
               <Button
                 variant="outline"
@@ -230,7 +240,7 @@ export function OrderListPage() {
                 disabled={page === totalPages}
                 onClick={() => setPage(page + 1)}
               >
-                Next <ChevronRight size={16} />
+                {t('Next', '下一页')} <ChevronRight size={16} />
               </Button>
             </div>
           )}

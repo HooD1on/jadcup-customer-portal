@@ -16,6 +16,16 @@ export default {
 
 const SHOWCASE_SOURCE = 'https://apijadcup.gradspace.org/Api/ProductForShowing/GetAllShowingProducts';
 const PREFERRED_PRODUCT_IDS = [36, 38, 94, 271, 1177, 474];
+const FAMILY_TARGETS = {
+  hot: 3,
+  cold: 3,
+  dessert: 2,
+  food: 3,
+  wrap: 2,
+  bags: 2,
+  bakery: 2,
+  accessories: 2,
+};
 
 function cleanText(value, fallback, maxLength = 120) {
   if (typeof value !== 'string') return fallback;
@@ -33,18 +43,56 @@ function safeImage(value) {
   }
 }
 
-function inferCategory(name, sourceCategory) {
+function inferFamily(name) {
   const lowerName = name.toLowerCase();
-  if (lowerName.includes('ice cream')) return 'Dessert packaging';
-  if (lowerName.includes('clear')) return 'Clear cups';
-  if (lowerName.includes('milkshake') || lowerName.includes('cold')) return 'Cold drinks';
-  if (lowerName.includes('napkin')) return 'Brand accessories';
-  if (lowerName.includes('cup')) return 'Hot cups';
-  return cleanText(sourceCategory, 'Food packaging', 50);
+  if (/ice cream|gelato|dessert cup/.test(lowerName)) return 'dessert';
+  if (/cake box|bakery|pastry box/.test(lowerName)) return 'bakery';
+  if (/greaseproof|deli paper|wrapping paper|food wrap/.test(lowerName)) return 'wrap';
+  if (/paper bag|carry bag|takeaway bag/.test(lowerName)) return 'bags';
+  if (/napkin|tissue/.test(lowerName)) return 'accessories';
+  if (/bowl|container|takeaway box|food box|lunch box|paper tray/.test(lowerName)) return 'food';
+  if (/clear cup|cold cup|milkshake|smoothie|pet cup|pla cup/.test(lowerName)) return 'cold';
+  if (/paper cup|hot cup|single wall|double wall/.test(lowerName)) return 'hot';
+  return '';
+}
+
+function categoryForFamily(family, sourceCategory) {
+  const labels = {
+    hot: 'Hot cups',
+    cold: 'Cold drinks',
+    dessert: 'Dessert packaging',
+    food: 'Food containers',
+    wrap: 'Food wrapping paper',
+    bags: 'Paper bags',
+    bakery: 'Bakery packaging',
+    accessories: 'Brand accessories',
+  };
+  return labels[family] || cleanText(sourceCategory, 'Food packaging', 50);
+}
+
+function representativeScore(product) {
+  const name = cleanText(product?.baseProductName, '').toLowerCase();
+  let score = 0;
+  if (/8oz|12oz|16oz|500ml|750ml|1000ml/.test(name)) score += 4;
+  if (!/custom|printed/.test(name)) score += 2;
+  if (safeImage(product?.sampleImage)) score += 2;
+  if (cleanText(product?.rawmaterialDesc, '')) score += 1;
+  if (Number(product?.packagingType?.quantity) > 0) score += 1;
+  return score;
+}
+
+function isUsableProduct(product) {
+  const id = Number(product?.baseProductId);
+  const name = cleanText(product?.baseProductName, '').toLowerCase();
+  return Number.isFinite(id)
+    && Boolean(name)
+    && !/obsolete|discontinued|delete|testing|test product|do not use/.test(name)
+    && Boolean(inferFamily(name));
 }
 
 function publicProduct(product) {
   const name = cleanText(product?.baseProductName, 'Jadcup food packaging');
+  const family = inferFamily(name);
   const quantity = Number(product?.packagingType?.quantity);
   const packageName = cleanText(product?.packagingType?.packagingTypeName, '', 50);
 
@@ -52,13 +100,43 @@ function publicProduct(product) {
     id: Number(product?.baseProductId),
     name,
     productCode: cleanText(product?.productCode, 'Ask Jadcup', 50),
-    category: inferCategory(name, product?.productType?.productTypeName),
+    family,
+    category: categoryForFamily(family, product?.productType?.productTypeName),
     material: cleanText(product?.rawmaterialDesc, 'Ask about material options', 90),
     packSize: Number.isFinite(quantity) && quantity > 0
       ? `${quantity.toLocaleString('en-NZ')} per ${packageName.toLowerCase() || 'pack'}`
       : 'Ask about available pack sizes',
     image: safeImage(product?.sampleImage),
+    source: 'live-catalogue',
   };
+}
+
+function selectRepresentativeProducts(rows) {
+  const usableRows = rows.filter(isUsableProduct);
+  const byId = new Map(usableRows.map((row) => [Number(row?.baseProductId), row]));
+  const selected = [];
+  const selectedIds = new Set();
+  const familyCounts = new Map();
+
+  const add = (row) => {
+    if (!row) return;
+    const id = Number(row?.baseProductId);
+    const family = inferFamily(cleanText(row?.baseProductName, ''));
+    const target = FAMILY_TARGETS[family] || 0;
+    const current = familyCounts.get(family) || 0;
+    if (!family || selectedIds.has(id) || current >= target) return;
+    selected.push(row);
+    selectedIds.add(id);
+    familyCounts.set(family, current + 1);
+  };
+
+  PREFERRED_PRODUCT_IDS.forEach((id) => add(byId.get(id)));
+  usableRows
+    .slice()
+    .sort((a, b) => representativeScore(b) - representativeScore(a))
+    .forEach(add);
+
+  return selected;
 }
 
 async function getShowcaseProducts() {
@@ -71,8 +149,7 @@ async function getShowcaseProducts() {
 
     const payload = await upstream.json();
     const rows = Array.isArray(payload?.data) ? payload.data : [];
-    const byId = new Map(rows.map((row) => [Number(row?.baseProductId), row]));
-    const selected = PREFERRED_PRODUCT_IDS.map((id) => byId.get(id)).filter(Boolean);
+    const selected = selectRepresentativeProducts(rows);
     const products = selected.map(publicProduct).filter((product) => Number.isFinite(product.id));
 
     return Response.json(

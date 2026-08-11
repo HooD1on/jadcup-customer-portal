@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X, LayoutDashboard, ShoppingBag } from 'lucide-react';
+import { LogOut, Menu, X, LayoutDashboard, PackageSearch, ShoppingBag } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../../features/auth/AuthContext';
 import { Button } from '../ui/Button';
+import { LanguageToggle } from './LanguageToggle';
+import { useLanguage } from '../../features/language/LanguageContext';
 
 const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/orders', label: 'My Orders', icon: ShoppingBag },
+  { to: '/dashboard', en: 'Overview', zh: '概览', icon: LayoutDashboard },
+  { to: '/orders', en: 'My Orders', zh: '我的订单', icon: ShoppingBag },
+  { to: '/products', en: 'Products', zh: '产品', icon: PackageSearch },
 ];
 
 export function AuthHeader() {
@@ -15,7 +18,8 @@ export function AuthHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout } = useAuth();
-  const displayName = session?.userName || 'Customer';
+  const { t } = useLanguage();
+  const displayName = session?.userName || t('Customer', '客户');
 
   const signOut = () => {
     logout();
@@ -32,8 +36,8 @@ export function AuthHeader() {
           <Logo />
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
-            {navItems.map(({ to, label, icon: Icon }) => (
+          <nav className="hidden md:flex items-center gap-1" aria-label={t('Main navigation', '主导航')}>
+            {navItems.map(({ to, en, zh, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
@@ -44,16 +48,17 @@ export function AuthHeader() {
                 }`}
               >
                 <Icon size={16} />
-                {label}
+                {t(en, zh)}
               </Link>
             ))}
           </nav>
 
           {/* Desktop user info */}
           <div className="hidden md:flex items-center gap-3">
+            <LanguageToggle compact />
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900 leading-tight">{displayName}</p>
-              <p className="text-xs text-gray-500 leading-tight">Customer Portal</p>
+              <p className="text-xs text-gray-500 leading-tight">{t('Customer Portal', '客户门户')}</p>
             </div>
             <div className="w-9 h-9 rounded-full bg-jade-100 flex items-center justify-center">
               <span className="text-sm font-semibold text-jade-700">
@@ -62,7 +67,7 @@ export function AuthHeader() {
             </div>
             <Button variant="ghost" size="sm" onClick={signOut}>
               <LogOut size={15} />
-              Sign Out
+              {t('Sign Out', '退出')}
             </Button>
           </div>
 
@@ -72,7 +77,7 @@ export function AuthHeader() {
             className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-expanded={mobileOpen}
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? t('Close menu', '关闭菜单') : t('Open menu', '打开菜单')}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -81,8 +86,9 @@ export function AuthHeader() {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <nav className="md:hidden border-t border-gray-100 bg-white" aria-label="Mobile navigation">
+        <nav className="md:hidden border-t border-gray-100 bg-white" aria-label={t('Mobile navigation', '移动端导航')}>
           <div className="px-4 py-3">
+            <div className="mb-3"><LanguageToggle /></div>
             {/* User info */}
             <div className="flex items-center gap-3 px-3 py-3 mb-2 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 rounded-full bg-jade-100 flex items-center justify-center flex-shrink-0">
@@ -92,11 +98,11 @@ export function AuthHeader() {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">{displayName}</p>
-                <p className="text-xs text-gray-500">Customer Portal</p>
+                <p className="text-xs text-gray-500">{t('Customer Portal', '客户门户')}</p>
               </div>
             </div>
 
-            {navItems.map(({ to, label, icon: Icon }) => (
+            {navItems.map(({ to, en, zh, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
@@ -108,7 +114,7 @@ export function AuthHeader() {
                 onClick={() => setMobileOpen(false)}
               >
                 <Icon size={18} />
-                {label}
+                {t(en, zh)}
               </Link>
             ))}
             <button
@@ -117,7 +123,7 @@ export function AuthHeader() {
               className="w-full flex items-center gap-3 px-3 py-2.5 mt-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50"
             >
               <LogOut size={18} />
-              Sign Out
+              {t('Sign Out', '退出')}
             </button>
           </div>
         </nav>
