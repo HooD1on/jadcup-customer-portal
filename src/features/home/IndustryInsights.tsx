@@ -21,6 +21,9 @@ type InsightArticle = {
   takeaway: string;
   takeawayZh: string;
   href: string;
+  image: string;
+  imageAlt: string;
+  imageAltZh: string;
   icon: LucideIcon;
 };
 
@@ -41,6 +44,9 @@ const featuredInsight: InsightArticle = {
   takeawayZh:
     '可以同时检查菜单形式、份量与包装采购数量。更精简的产品组合，可能同时降低食材风险和包装复杂度。',
   href: 'https://www.bidfood.co.nz/post/foodservice-market-update-nz-market-bites-july-2026',
+  image: '/img/insight-market-bites.jpg',
+  imageAlt: 'Market Bites July 2026 foodservice report cover featuring a plated winter dish',
+  imageAltZh: 'Market Bites 2026年7月餐饮市场报告封面与冬季餐点',
   icon: TrendingUp,
 };
 
@@ -62,6 +68,9 @@ const supportingInsights: InsightArticle[] = [
     takeawayZh:
       '可循环包装要真正有效，必须把回收流程与包装本身一起设计。',
     href: 'https://transporttalk.co.nz/news/reusable-crate-system-replaces-200-million-cardboard-boxes-in-nz-produce-sector',
+    image: '/img/insight-reusable-crates.jpg',
+    imageAlt: 'New Zealand grower carrying fresh produce in a reusable crate',
+    imageAltZh: '新西兰种植者使用可重复使用周转箱搬运新鲜农产品',
     icon: Recycle,
   },
   {
@@ -81,6 +90,9 @@ const supportingInsights: InsightArticle[] = [
     takeawayZh:
       '包装需要支持快速取餐、适合办公桌用餐，并在更多菜单组合中保持统一品牌体验。',
     href: 'https://www.nestleprofessional.co.nz/resources/foodservice-trends-2026',
+    image: '/img/insight-foodservice-trends.jpg',
+    imageAlt: 'Customers sharing a meal in a contemporary foodservice venue',
+    imageAltZh: '顾客在现代餐饮场所共同用餐',
     icon: Newspaper,
   },
   {
@@ -100,6 +112,9 @@ const supportingInsights: InsightArticle[] = [
     takeawayZh:
       '更换包装材料需要实际测试：食品接触、温度、设备适配和最终回收方式都很重要。',
     href: 'https://www.foodstuffs.co.nz/news-room/2026/foodstuffs-transitions-plastic-wrap-from-pvc-to-recyclable-plastic',
+    image: '/img/insight-foodstuffs-wrap.jpg',
+    imageAlt: 'Foodstuffs packaging specialist explaining the move away from non-recyclable plastic wrap',
+    imageAltZh: 'Foodstuffs包装专家介绍停止使用不可回收塑料保鲜膜的计划',
     icon: PackageCheck,
   },
 ];
@@ -145,6 +160,19 @@ export function IndustryInsights() {
                 {t(featuredInsight.summary, featuredInsight.summaryZh)}
               </p>
 
+              <figure className="relative mt-7 overflow-hidden rounded-[1.5rem] border border-white/10 bg-jade-900">
+                <img
+                  src={featuredInsight.image}
+                  alt={t(featuredInsight.imageAlt, featuredInsight.imageAltZh)}
+                  className="aspect-video w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption className="absolute bottom-3 right-3 rounded-full bg-jade-950/85 px-3 py-1.5 text-[0.65rem] font-bold text-white backdrop-blur-sm">
+                  {t('Image', '图片')} · {featuredInsight.source}
+                </figcaption>
+              </figure>
+
               <div className="mt-7 rounded-2xl border border-white/10 bg-white/7 p-5">
                 <p className="text-xs font-black uppercase tracking-[0.14em] text-lime-300">
                   {t('What this could mean for your business', '这对您的业务可能意味着什么')}
@@ -171,6 +199,18 @@ export function IndustryInsights() {
 
               return (
                 <article key={article.href} className="group rounded-[1.5rem] border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-jade-200 hover:shadow-md sm:p-6">
+                  <figure className="relative mb-5 overflow-hidden rounded-2xl bg-stone-100">
+                    <img
+                      src={article.image}
+                      alt={t(article.imageAlt, article.imageAltZh)}
+                      className="aspect-[16/7] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <figcaption className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2.5 py-1 text-[0.6rem] font-bold text-white backdrop-blur-sm">
+                      {article.source}
+                    </figcaption>
+                  </figure>
                   <div className="flex items-start gap-4">
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-jade-100 text-jade-800">
                       <Icon size={20} />
