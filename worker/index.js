@@ -33,10 +33,29 @@ function cleanText(value, fallback, maxLength = 120) {
   return clean ? clean.slice(0, maxLength) : fallback;
 }
 
-function safeImage(value) {
+function imageValue(value) {
+  if (!value) return null;
+  if (typeof value === 'object') {
+    if (Array.isArray(value)) return imageValue(value[0]);
+    return imageValue(value.url || value.src || value.showImgUrl);
+  }
   if (typeof value !== 'string' || !value.trim()) return null;
+  const trimmed = value.trim();
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    try {
+      return imageValue(JSON.parse(trimmed));
+    } catch {
+      return null;
+    }
+  }
+  return trimmed;
+}
+
+function safeImage(value) {
+  const candidate = imageValue(value);
+  if (!candidate) return null;
   try {
-    const imageUrl = new URL(value, SHOWCASE_SOURCE);
+    const imageUrl = new URL(candidate, SHOWCASE_SOURCE);
     return imageUrl.protocol === 'https:' ? imageUrl.toString() : null;
   } catch {
     return null;
@@ -75,7 +94,7 @@ function representativeScore(product) {
   let score = 0;
   if (/8oz|12oz|16oz|500ml|750ml|1000ml/.test(name)) score += 4;
   if (!/custom|printed/.test(name)) score += 2;
-  if (safeImage(product?.sampleImage)) score += 2;
+  if (safeImage(product?.sampleImage || product?.showImgUrl)) score += 20;
   if (cleanText(product?.rawmaterialDesc, '')) score += 1;
   if (Number(product?.packagingType?.quantity) > 0) score += 1;
   return score;
@@ -106,7 +125,7 @@ function publicProduct(product) {
     packSize: Number.isFinite(quantity) && quantity > 0
       ? `${quantity.toLocaleString('en-NZ')} per ${packageName.toLowerCase() || 'pack'}`
       : 'Ask about available pack sizes',
-    image: safeImage(product?.sampleImage),
+    image: safeImage(product?.sampleImage || product?.showImgUrl),
     source: 'live-catalogue',
   };
 }
@@ -139,7 +158,7 @@ function selectRepresentativeProducts(rows) {
   return selected;
 }
 
-async function getShowcaseProducts() {
+export async function getShowcaseProducts() {
   try {
     const upstream = await fetch(SHOWCASE_SOURCE, {
       headers: { Accept: 'application/json' },

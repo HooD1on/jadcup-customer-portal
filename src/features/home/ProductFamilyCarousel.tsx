@@ -16,17 +16,9 @@ import {
   Store,
   Utensils,
 } from 'lucide-react';
+import { CatalogueProductImage } from '../../components/ui/CatalogueProductImage';
 import { getShowcaseProducts, type ProductFamily, type ShowcaseProduct } from '../../services/publicCatalogApi';
 import { useLanguage } from '../language/LanguageContext';
-
-const productArtwork: Record<number, string> = {
-  36: '/img/highlight-cups.svg',
-  38: '/img/cup-12oz.svg',
-  94: '/img/cup-16oz.svg',
-  271: '/img/highlight-accessories.svg',
-  1177: '/img/bowl.svg',
-  474: '/img/highlight-packaging.svg',
-};
 
 const productChinese: Record<number, { name: string; category: string; packSize: string }> = {
   36: { name: '12盎司单层可堆肥纸杯', category: '热饮杯', packSize: '每箱1,000个' },
@@ -153,8 +145,11 @@ export function ProductFamilyCarousel() {
 
   const activeFamily = productFamilyShowcase[carouselIndex];
   const ActiveFamilyIcon = activeFamily.icon;
-  const activeFamilyProducts = products.filter((product) => product.family === activeFamily.family).slice(0, 3);
-  const liveCatalogue = products.length > 0 && products.every((product) => product.source === 'live-catalogue');
+  const activeFamilyProducts = products
+    .filter((product) => product.family === activeFamily.family)
+    .sort((left, right) => Number(Boolean(right.image)) - Number(Boolean(left.image)))
+    .slice(0, 3);
+  const liveCatalogue = products.length > 0;
   const showPreviousFamily = () => setCarouselIndex((current) => (current - 1 + productFamilyShowcase.length) % productFamilyShowcase.length);
   const showNextFamily = () => setCarouselIndex((current) => (current + 1) % productFamilyShowcase.length);
 
@@ -177,7 +172,7 @@ export function ProductFamilyCarousel() {
         </div>
         <div className={`inline-flex items-center gap-2 self-start rounded-full px-3 py-1.5 text-xs font-bold sm:self-auto ${liveCatalogue ? 'bg-jade-100 text-jade-800' : 'bg-amber-100 text-amber-800'}`}>
           <ShieldCheck size={14} />
-          {liveCatalogue ? t('Live Jadcup catalogue records', 'Jadcup实时产品记录') : t('Verified catalogue snapshot', '已验证的产品快照')}
+          {liveCatalogue ? t('Live Jadcup catalogue records', 'Jadcup实时产品记录') : t('Live catalogue unavailable', '实时产品目录暂不可用')}
         </div>
       </div>
 
@@ -219,7 +214,7 @@ export function ProductFamilyCarousel() {
                   const localized = language === 'zh' ? productChinese[product.id] : undefined;
                   return (
                     <article key={product.id} className="overflow-hidden rounded-2xl border border-stone-200 bg-stone-50">
-                      <div className="h-44 bg-jade-50 p-3"><img src={product.image || productArtwork[product.id] || '/img/highlight-packaging.svg'} alt="" className="h-full w-full object-contain" /></div>
+                      <CatalogueProductImage src={product.image} alt={localized?.name || product.name} className="h-44 p-3" />
                       <div className="p-4"><p className="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-jade-700">#{product.id} · {localized?.category || product.category}</p><h4 className="mt-2 text-sm font-semibold capitalize leading-snug text-gray-950">{localized?.name || product.name}</h4><p className="mt-2 text-xs leading-relaxed text-stone-500">{localized?.packSize || product.packSize}</p></div>
                     </article>
                   );

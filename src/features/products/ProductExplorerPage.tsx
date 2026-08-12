@@ -9,6 +9,7 @@ import {
   RefreshCcw,
   ShieldCheck,
 } from 'lucide-react';
+import { CatalogueProductImage } from '../../components/ui/CatalogueProductImage';
 import { getShowcaseProducts, type ProductFamily, type ShowcaseProduct } from '../../services/publicCatalogApi';
 import { useAuth } from '../auth/AuthContext';
 import { useLanguage, type PortalLanguage } from '../language/LanguageContext';
@@ -21,15 +22,6 @@ const productChinese: Record<number, { name: string; category: string; material:
   271: { name: 'PLA透明冷饮杯', category: '透明杯', material: '植物基PLA', packSize: '提供多种尺寸' },
   1177: { name: '定制冰淇淋纸杯', category: '甜品包装', material: '印刷纸＋食品级淋膜', packSize: '可咨询现有尺寸' },
   474: { name: '定制印刷餐巾纸', category: '品牌配套', material: '印刷纸', packSize: '商业供应箱装' },
-};
-
-const productArtwork: Record<number, string> = {
-  36: '/img/highlight-cups.svg',
-  38: '/img/cup-12oz.svg',
-  94: '/img/cup-16oz.svg',
-  271: '/img/highlight-accessories.svg',
-  1177: '/img/bowl.svg',
-  474: '/img/highlight-packaging.svg',
 };
 
 const businessLabels: Record<string, [string, string]> = {
@@ -186,7 +178,7 @@ export function ProductExplorerPage() {
   }, [recommendations]);
 
   const comparisonProducts = recommendations.filter((product) => compareIds.includes(product.id));
-  const liveCatalogue = products.length > 0 && products.every((product) => product.source === 'live-catalogue');
+  const liveCatalogue = products.length > 0;
   const hasContext = Boolean(context.business || context.need || context.route);
   const hasCompletedDecision = Boolean(context.business && context.need && context.route);
   const continueDecisionTo = context.business
@@ -342,7 +334,7 @@ export function ProductExplorerPage() {
             <p className="section-kicker">{t('Representative shortlist', '代表性候选产品')}</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-gray-950">{t('Compare a few useful options, not every SKU.', '比较少量有用选项，而不是所有SKU。')}</h2>
           </div>
-          <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${liveCatalogue ? 'bg-jade-100 text-jade-800' : 'bg-amber-100 text-amber-800'}`}><ShieldCheck size={14} />{liveCatalogue ? t('Live Jadcup catalogue records', 'Jadcup实时产品记录') : t('Verified catalogue snapshot', '已验证的产品快照')}</div>
+          <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${liveCatalogue ? 'bg-jade-100 text-jade-800' : 'bg-amber-100 text-amber-800'}`}><ShieldCheck size={14} />{liveCatalogue ? t('Live Jadcup catalogue records', 'Jadcup实时产品记录') : t('Live catalogue unavailable', '实时产品目录暂不可用')}</div>
         </div>
 
         {loading ? (
@@ -355,7 +347,7 @@ export function ProductExplorerPage() {
               return (
                 <article key={product.id} className={`overflow-hidden rounded-[1.5rem] border bg-white transition ${comparing ? 'border-jade-700 shadow-md' : 'border-stone-200'}`}>
                   <div className="grid sm:grid-cols-[0.8fr_1.2fr]">
-                    <div className="min-h-56 bg-jade-50 p-5"><img src={product.image || productArtwork[product.id] || '/img/highlight-packaging.svg'} alt="" className="h-full w-full object-contain" /></div>
+                    <CatalogueProductImage src={product.image} alt={localized?.name || product.name} className="min-h-56 p-5" />
                     <div className="p-6">
                       <div className="flex items-start justify-between gap-4"><p className="text-xs font-bold uppercase tracking-[0.12em] text-jade-700">{localized?.category || product.category}</p><span className="text-[0.65rem] font-semibold text-stone-400">#{product.id}</span></div>
                       <h3 className="mt-3 text-xl font-semibold capitalize text-gray-950">{localized?.name || product.name}</h3>

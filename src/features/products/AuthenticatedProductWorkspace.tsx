@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
+import { CatalogueProductImage } from '../../components/ui/CatalogueProductImage';
 import { ProductImage } from '../../components/ui/ProductImage';
 import { mockCustomer, mockOrderDetails, mockOrders } from '../../mocks/data';
 import type { OrderProduct } from '../../types';
@@ -30,15 +31,6 @@ const productChinese: Record<number, { name: string; category: string; packSize:
   271: { name: 'PLA透明冷饮杯', category: '透明杯', packSize: '提供多种尺寸' },
   1177: { name: '定制冰淇淋纸杯', category: '甜品包装', packSize: '可咨询现有尺寸' },
   474: { name: '定制印刷餐巾纸', category: '品牌配套', packSize: '商业供应箱装' },
-};
-
-const productArtwork: Record<number, string> = {
-  36: '/img/highlight-cups.svg',
-  38: '/img/cup-12oz.svg',
-  94: '/img/cup-16oz.svg',
-  271: '/img/highlight-accessories.svg',
-  1177: '/img/bowl.svg',
-  474: '/img/highlight-packaging.svg',
 };
 
 const familyPriority: ProductFamily[] = ['accessories', 'cold', 'dessert', 'wrap', 'bags', 'bakery', 'food', 'hot'];
@@ -120,7 +112,7 @@ export function AuthenticatedProductWorkspace({
   const validOrders = mockOrders.filter((order) => order.status !== 'cancelled');
   const latestOrder = [...validOrders].sort((left, right) => right.orderDate.localeCompare(left.orderDate))[0];
   const seedProduct = language === 'zh' ? '热饮杯和相关产品' : accountProducts[0]?.productName || 'your core products';
-  const liveCatalogue = products.length > 0 && products.every((product) => product.source === 'live-catalogue');
+  const liveCatalogue = products.length > 0;
 
   return (
     <main className="flex-1 bg-stone-50">
@@ -189,7 +181,7 @@ export function AuthenticatedProductWorkspace({
                 const quoteQuery = new URLSearchParams({ route: 'repeat', product: product.name, source: 'account-recommendation' }).toString();
                 return (
                   <article key={product.id} className="flex min-h-[28rem] flex-col overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white">
-                    <div className="h-48 bg-jade-50 p-5"><img src={product.image || productArtwork[product.id] || '/img/highlight-packaging.svg'} alt="" className="h-full w-full object-contain" /></div>
+                    <CatalogueProductImage src={product.image} alt={localized?.name || product.name} className="h-48 p-5" />
                     <div className="flex flex-1 flex-col p-6">
                       <div className="flex items-center justify-between gap-3"><p className="text-[0.65rem] font-bold uppercase tracking-[0.11em] text-jade-700">{localized?.category || product.category}</p><span className="rounded-full bg-lime-200 px-2.5 py-1 text-[0.62rem] font-bold text-jade-950">{t('Related purchase', '关联采购')}</span></div>
                       <h3 className="mt-3 text-lg font-semibold capitalize leading-snug text-gray-950">{localized?.name || product.name}</h3>
@@ -207,7 +199,7 @@ export function AuthenticatedProductWorkspace({
 
           <div className="mt-7 flex flex-col gap-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3"><CalendarDays className="mt-0.5 shrink-0 text-amber-700" size={18} /><p className="max-w-3xl text-xs leading-relaxed text-amber-900/75">{t('Prototype note: this preview uses the portal’s current sample account orders and approved product records. Production recommendations should be calculated from aggregated real orders, compatibility and live availability.', '样品说明：当前预览使用门户现有的示例账户订单与已确认产品记录。正式推荐应根据汇总真实订单、规格兼容性和实时可售状态计算。')}</p></div>
-            <span className={`shrink-0 rounded-full px-3 py-1.5 text-[0.65rem] font-bold ${liveCatalogue ? 'bg-jade-100 text-jade-800' : 'bg-white text-amber-800'}`}>{liveCatalogue ? t('Live catalogue products', '实时目录产品') : t('Verified product snapshot', '已验证产品快照')}</span>
+            <span className={`shrink-0 rounded-full px-3 py-1.5 text-[0.65rem] font-bold ${liveCatalogue ? 'bg-jade-100 text-jade-800' : 'bg-white text-amber-800'}`}>{liveCatalogue ? t('Live catalogue products', '实时目录产品') : t('Live catalogue unavailable', '实时产品目录暂不可用')}</span>
           </div>
         </section>
       </section>
