@@ -17,14 +17,15 @@ import { ErrorState } from '../../components/feedback/ErrorState';
 import { mockOrderDetails } from '../../mocks/data';
 import { formatCurrency, formatDate } from '../../lib/format';
 import type { OrderStatus, OrderDetail } from '../../types';
+import { useLanguage } from '../language/LanguageContext';
 
-const timelineSteps: { status: OrderStatus; label: string; icon: typeof Clock }[] = [
-  { status: 'pending', label: 'Order Placed', icon: FileText },
-  { status: 'confirmed', label: 'Confirmed', icon: CheckCircle2 },
-  { status: 'in-production', label: 'In Production', icon: PackageIcon },
-  { status: 'ready-to-ship', label: 'Ready to Ship', icon: Truck },
-  { status: 'shipped', label: 'Shipped', icon: Truck },
-  { status: 'delivered', label: 'Delivered', icon: CheckCircle2 },
+const timelineSteps: { status: OrderStatus; label: string; labelZh: string; icon: typeof Clock }[] = [
+  { status: 'pending', label: 'Order Placed', labelZh: '订单已提交', icon: FileText },
+  { status: 'confirmed', label: 'Confirmed', labelZh: '已确认', icon: CheckCircle2 },
+  { status: 'in-production', label: 'In Production', labelZh: '生产中', icon: PackageIcon },
+  { status: 'ready-to-ship', label: 'Ready to Ship', labelZh: '待发货', icon: Truck },
+  { status: 'shipped', label: 'Shipped', labelZh: '已发货', icon: Truck },
+  { status: 'delivered', label: 'Delivered', labelZh: '已送达', icon: CheckCircle2 },
 ];
 
 const statusIndex: Record<OrderStatus, number> = {
@@ -42,6 +43,7 @@ function getActiveStep(status: OrderStatus): number {
 }
 
 function HorizontalTimeline({ activeStep }: { activeStep: number }) {
+  const { t } = useLanguage();
   return (
     <div className="flex items-center">
       {timelineSteps.map((step, i) => {
@@ -65,7 +67,7 @@ function HorizontalTimeline({ activeStep }: { activeStep: number }) {
                   isComplete ? 'text-jade-700 font-medium' : 'text-gray-400'
                 }`}
               >
-                {step.label}
+                {t(step.label, step.labelZh)}
               </span>
             </div>
             {i < timelineSteps.length - 1 && (
@@ -83,6 +85,7 @@ function HorizontalTimeline({ activeStep }: { activeStep: number }) {
 }
 
 function VerticalTimeline({ activeStep }: { activeStep: number }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col">
       {timelineSteps.map((step, i) => {
@@ -114,7 +117,7 @@ function VerticalTimeline({ activeStep }: { activeStep: number }) {
                 isComplete ? 'text-jade-700 font-medium' : 'text-gray-400'
               }`}
             >
-              {step.label}
+              {t(step.label, step.labelZh)}
             </span>
           </div>
         );
@@ -124,6 +127,8 @@ function VerticalTimeline({ activeStep }: { activeStep: number }) {
 }
 
 export function OrderDetailPage() {
+  const { language, t } = useLanguage();
+  const locale = language === 'zh' ? 'zh-CN' : 'en-NZ';
   const { orderId } = useParams<{ orderId: string }>();
   const order: OrderDetail | undefined = orderId ? mockOrderDetails[orderId] : undefined;
 
@@ -131,13 +136,13 @@ export function OrderDetailPage() {
     return (
       <PageShell>
         <ErrorState
-          title="Order not found"
-          message="We couldn't find this order. It may have been removed or the link is incorrect."
+          title={t('Order not found', '未找到订单')}
+          message={t("We couldn't find this order. It may have been removed or the link is incorrect.", '无法找到该订单。订单可能已被移除，或链接有误。')}
         />
         <div className="text-center mt-4">
           <Link to="/orders" className="no-underline">
             <Button variant="outline">
-              <ArrowLeft size={16} /> Back to Orders
+              <ArrowLeft size={16} /> {t('Back to Orders', '返回订单列表')}
             </Button>
           </Link>
         </div>
@@ -152,7 +157,7 @@ export function OrderDetailPage() {
       {/* Back link */}
       <Link to="/orders" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-jade-700 no-underline mb-4">
         <ArrowLeft size={14} />
-        Back to Orders
+        {t('Back to Orders', '返回订单列表')}
       </Link>
 
       {/* Order header */}
@@ -163,7 +168,7 @@ export function OrderDetailPage() {
             <StatusBadge status={order.status} />
           </div>
           {order.custOrderNo && (
-            <p className="text-sm text-gray-500">Your Reference: {order.custOrderNo}</p>
+            <p className="text-sm text-gray-500">{t('Your Reference', '您的参考号')}: {order.custOrderNo}</p>
           )}
         </div>
       </div>
@@ -171,7 +176,7 @@ export function OrderDetailPage() {
       {/* Progress timeline — not shown for cancelled orders */}
       {order.status !== 'cancelled' && (
         <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5 mb-6">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">Order Progress</h2>
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('Order Progress', '订单进度')}</h2>
           {/* Vertical on mobile, horizontal on md+ */}
           <div className="md:hidden">
             <VerticalTimeline activeStep={activeStep} />
@@ -187,28 +192,28 @@ export function OrderDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Order summary card */}
           <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">Order Details</h2>
+            <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('Order Details', '订单详情')}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">Order Date</p>
+                <p className="text-xs text-gray-500 mb-0.5">{t('Order Date', '下单日期')}</p>
                 <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
                   <Calendar size={13} className="text-gray-400" />
-                  {formatDate(order.orderDate)}
+                  {formatDate(order.orderDate, locale)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 mb-0.5">Required Date</p>
+                <p className="text-xs text-gray-500 mb-0.5">{t('Required Date', '要求日期')}</p>
                 <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
                   <Clock size={13} className="text-gray-400" />
-                  {formatDate(order.requiredDate)}
+                  {formatDate(order.requiredDate, locale)}
                 </p>
               </div>
               {order.deliveryDate && (
                 <div>
-                  <p className="text-xs text-gray-500 mb-0.5">Delivery Date</p>
+                  <p className="text-xs text-gray-500 mb-0.5">{t('Delivery Date', '配送日期')}</p>
                   <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
                     <Truck size={13} className="text-gray-400" />
-                    {formatDate(order.deliveryDate)}
+                    {formatDate(order.deliveryDate, locale)}
                   </p>
                 </div>
               )}
@@ -219,7 +224,7 @@ export function OrderDetailPage() {
           <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card)">
             <div className="p-5 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900">
-                Products ({order.products.length})
+                {t('Products', '产品')} ({order.products.length})
               </h2>
             </div>
             <div className="divide-y divide-gray-100">
@@ -240,16 +245,16 @@ export function OrderDetailPage() {
                       </p>
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <p className="text-[10px] text-gray-400 uppercase">Unit Price</p>
-                          <p className="text-sm font-medium text-gray-900">{formatCurrency(product.unitPrice)}</p>
+                          <p className="text-[10px] text-gray-400 uppercase">{t('Unit Price', '单价')}</p>
+                          <p className="text-sm font-medium text-gray-900">{formatCurrency(product.unitPrice, locale)}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-gray-400 uppercase">QTY</p>
+                          <p className="text-[10px] text-gray-400 uppercase">{t('QTY', '数量')}</p>
                           <p className="text-sm font-medium text-gray-900">{product.quantity.toLocaleString()}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-gray-400 uppercase">Price</p>
-                          <p className="text-sm font-semibold text-gray-900">{formatCurrency(product.price)}</p>
+                          <p className="text-[10px] text-gray-400 uppercase">{t('Price', '金额')}</p>
+                          <p className="text-sm font-semibold text-gray-900">{formatCurrency(product.price, locale)}</p>
                         </div>
                       </div>
                     </div>
@@ -266,19 +271,19 @@ export function OrderDetailPage() {
           <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5">
             <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <MapPin size={14} className="text-gray-400" />
-              Delivery Information
+              {t('Delivery Information', '配送信息')}
             </h2>
             <div className="space-y-2">
               <div>
-                <p className="text-xs text-gray-500">Delivery Name</p>
+                <p className="text-xs text-gray-500">{t('Delivery Name', '收货名称')}</p>
                 <p className="text-sm text-gray-900">{order.deliveryName}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Address</p>
+                <p className="text-xs text-gray-500">{t('Address', '地址')}</p>
                 <p className="text-sm text-gray-900">{order.deliveryAddress}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Postal Code</p>
+                <p className="text-xs text-gray-500">{t('Postal Code', '邮编')}</p>
                 <p className="text-sm text-gray-900">{order.postalCode}</p>
               </div>
             </div>
@@ -286,10 +291,10 @@ export function OrderDetailPage() {
 
           {/* Order total — no subtotal/GST breakdown (unverified) */}
           <div className="bg-white rounded-(--radius-card) shadow-(--shadow-card) p-5">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">Order Total</h2>
+            <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('Order Total', '订单总计')}</h2>
             <div className="text-center py-2">
-              <p className="text-2xl font-bold text-jade-700">{formatCurrency(order.priceInclGst)}</p>
-              <p className="text-xs text-gray-400 mt-1">Including GST</p>
+              <p className="text-2xl font-bold text-jade-700">{formatCurrency(order.priceInclGst, locale)}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('Including GST', '含 GST')}</p>
             </div>
           </div>
         </div>
