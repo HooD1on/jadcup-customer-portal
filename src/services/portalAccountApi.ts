@@ -35,11 +35,7 @@ export interface PortalAccountStatusResult {
   rejectionReason?: string;
 }
 
-// Local development can point at the local API, but a production build must
-// never send customer credentials to localhost on the visitor's computer.
-const API_BASE_URL = (import.meta.env.DEV
-  ? (import.meta.env.VITE_PORTAL_API_BASE_URL || 'http://localhost:5020')
-  : 'https://apijadcup.gradspace.org')
+const API_BASE_URL = (import.meta.env.VITE_PORTAL_API_BASE_URL || 'http://localhost:5020')
   .replace(/\/$/, '');
 
 function messageText(value: unknown): string | undefined {
