@@ -15,6 +15,7 @@ import { PackagingFinderPage } from '../features/start/PackagingFinderPage';
 import { ProductExplorerPage } from '../features/products/ProductExplorerPage';
 import { SampleRequestPage } from '../features/sample/SampleRequestPage';
 import { HelpPage } from '../features/help/HelpPage';
+import { QuotationPage } from '../features/quotation/QuotationPage';
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: '/orders/:orderId', element: <OrderDetailPage /> },
       { path: '/_demo', element: <DemoPage /> },
       { path: '/catalog', element: <CatalogPage />},
+      { path: '/quotations', element: <QuotationPage /> },
     ],
   },
   {

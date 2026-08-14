@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X, LayoutDashboard, PackageSearch, ShoppingBag } from 'lucide-react';
+import { ChevronDown, FileText, LayoutDashboard, LogOut, Menu, Package, PackageSearch, ShoppingBag, X } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../../features/auth/AuthContext';
 import { Button } from '../ui/Button';
@@ -10,11 +10,19 @@ import { useLanguage } from '../../features/language/LanguageContext';
 const navItems = [
   { to: '/dashboard', en: 'Overview', zh: '概览', icon: LayoutDashboard },
   { to: '/orders', en: 'My Orders', zh: '我的订单', icon: ShoppingBag },
-  { to: '/products', en: 'Products', zh: '产品', icon: PackageSearch },
 ];
+
+const productLinks = [
+  { to: '/catalog', en: 'Catalog', zh: '目录', description: 'Browse products & special offers', icon: Package },
+  { to: '/quotations', en: 'Quotations', zh: '报价', description: 'Review quote requests & pricing', icon: FileText },
+];
+
+const productsLink = { to: '/products', en: 'Products', zh: '产品', icon: PackageSearch };
 
 export function AuthHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+  const productsMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { session, logout } = useAuth();
@@ -29,6 +37,28 @@ export function AuthHeader() {
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + '/');
 
+  const hasActiveProductLink = productLinks.some((item) => isActive(item.to));
+
+  useEffect(() => {
+    setProductsOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!productsMenuRef.current?.contains(event.target as Node)) setProductsOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setProductsOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, []);
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,12 +66,12 @@ export function AuthHeader() {
           <Logo />
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label={t('Main navigation', '主导航')}>
+          <nav className="hidden lg:flex items-center gap-1" aria-label={t('Main navigation', '主导航')}>
             {navItems.map(({ to, en, zh, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium no-underline transition-colors ${
+                className={`flex items-center gap-2 px-2 py-2 rounded-lg text-sm font-medium no-underline transition-colors ${
                   isActive(to)
                     ? 'bg-jade-50 text-jade-700'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
@@ -51,10 +81,60 @@ export function AuthHeader() {
                 {t(en, zh)}
               </Link>
             ))}
+            <div className="relative" ref={productsMenuRef}>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={productsOpen}
+                aria-controls="catalog-quotations-menu"
+                onClick={() => setProductsOpen((open) => !open)}
+                className={`flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                  hasActiveProductLink
+                    ? 'bg-jade-50 text-jade-700'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <Package size={16} />
+                {t('Catalog & Quotations', '目录与报价')}
+                <ChevronDown size={14} className={`transition-transform ${productsOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+              {productsOpen && (
+                <div id="catalog-quotations-menu" role="menu" className="absolute left-0 top-full z-10 mt-2 w-72 rounded-(--radius-card) border border-gray-200 bg-white p-2 shadow-(--shadow-card-hover)">
+                  {productLinks.map(({ to, en, zh, description, icon: Icon }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      role="menuitem"
+                      onClick={() => setProductsOpen(false)}
+                      className={`flex items-start gap-3 rounded-lg p-3 no-underline transition-colors ${
+                        isActive(to) ? 'bg-jade-50' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      <Icon size={18} className="mt-0.5 shrink-0 text-jade-700" aria-hidden="true" />
+                      <span>
+                        <span className="block text-sm font-semibold text-gray-900">{t(en, zh)}</span>
+                        <span className="mt-0.5 block text-xs leading-5 text-gray-500">{description}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <Link
+              to={productsLink.to}
+              className={`flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium no-underline transition-colors ${
+                isActive(productsLink.to)
+                  ? 'bg-jade-50 text-jade-700'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <PackageSearch size={16} />
+              {t(productsLink.en, productsLink.zh)}
+            </Link>
           </nav>
 
           {/* Desktop user info */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <LanguageToggle compact />
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900 leading-tight">{displayName}</p>
@@ -74,7 +154,7 @@ export function AuthHeader() {
           {/* Mobile menu button */}
           <button
             type="button"
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+            className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? t('Close menu', '关闭菜单') : t('Open menu', '打开菜单')}
@@ -86,7 +166,7 @@ export function AuthHeader() {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <nav className="md:hidden border-t border-gray-100 bg-white" aria-label={t('Mobile navigation', '移动端导航')}>
+        <nav className="lg:hidden border-t border-gray-100 bg-white" aria-label={t('Mobile navigation', '移动端导航')}>
           <div className="px-4 py-3">
             <div className="mb-3"><LanguageToggle /></div>
             {/* User info */}
@@ -117,6 +197,33 @@ export function AuthHeader() {
                 {t(en, zh)}
               </Link>
             ))}
+            {productLinks.map(({ to, en, zh, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium no-underline transition-colors ${
+                  isActive(to)
+                    ? 'bg-jade-50 text-jade-700'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+                onClick={() => setMobileOpen(false)}
+              >
+                <Icon size={18} />
+                {t(en, zh)}
+              </Link>
+            ))}
+            <Link
+              to={productsLink.to}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium no-underline transition-colors ${
+                isActive(productsLink.to)
+                  ? 'bg-jade-50 text-jade-700'
+                  : 'text-gray-600 hover:bg-gray-50'
+              }`}
+              onClick={() => setMobileOpen(false)}
+            >
+              <PackageSearch size={18} />
+              {t(productsLink.en, productsLink.zh)}
+            </Link>
             <button
               type="button"
               onClick={signOut}

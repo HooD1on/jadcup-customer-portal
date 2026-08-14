@@ -7,6 +7,7 @@ import { useAuth } from '../auth/AuthContext';
 import { portalAccountApi, PortalApiError } from '../../services/portalAccountApi';
 import type { CatalogProduct } from '../../types';
 import { Package } from 'lucide-react';
+import { PromotionSection } from './PromotionSection';
 
 export function CatalogPage() {
   const { session } = useAuth();
@@ -29,9 +30,11 @@ export function CatalogPage() {
 
   return (
     <PageShell>
-      <div className="flex items-center gap-2">
+      <PromotionSection />
+
+      <div className="mt-10 flex items-center gap-2">
         <Package size={18} className="text-jade-700" aria-hidden="true" />
-        <h1 className="text-xl font-bold text-jade-900">All Products</h1>
+        <h2 className="text-xl font-bold text-jade-900">All Products</h2>
       </div>
 
       {isLoading && <LoadingState />}
