@@ -1,3 +1,5 @@
+import type { CatalogProduct } from '../types';
+
 export type PortalAccountStatus = 'Pending' | 'Approved' | 'Rejected' | 'Disabled';
 
 interface TaskResponse<T> {
@@ -129,6 +131,14 @@ export const portalAccountApi = {
   getStatus(token: string) {
     return request<PortalAccountStatusResult>(
       '/api/portal/account/status',
+      { method: 'GET' },
+      token,
+    );
+  },
+
+  getCatalogProducts(token: string) {
+    return request<CatalogProduct[]>(
+      '/api/Catalog/GetAllCatalogProducts',
       { method: 'GET' },
       token,
     );

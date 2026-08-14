@@ -37,13 +37,14 @@ export const router = createBrowserRouter([
       { path: '/orders', element: <OrderListPage /> },
       { path: '/orders/:orderId', element: <OrderDetailPage /> },
       { path: '/_demo', element: <DemoPage /> },
+      { path: '/catalog', element: <CatalogPage />},
     ],
   },
   {
     element: <PublicLayout />,
     children: [
       { path: '*', element: <NotFoundPage /> },
-      { path: '/catalog', element: <CatalogPage />},
+      
     ],
   },
 ]);

@@ -60,6 +60,13 @@ export interface ProductHighlight {
   productCode: string;
 }
 
+export interface CatalogProduct {
+  baseProductId: number;
+  baseProductName: string;
+  productCode: string;
+  sampleImage: string;
+}
+
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'Pending',
   confirmed: 'Confirmed',
