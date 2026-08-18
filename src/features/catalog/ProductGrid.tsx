@@ -4,11 +4,13 @@ import type { CatalogProduct } from '../../types';
 
 interface ProductGridProps {
   products: CatalogProduct[];
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
-export function ProductGrid({ products }: ProductGridProps) {
+export function ProductGrid({ products, emptyTitle = 'No products found.', emptyDescription }: ProductGridProps) {
   if (products.length === 0) {
-    return <EmptyState title="No products found." />;
+    return <EmptyState title={emptyTitle} description={emptyDescription} />;
   }
 
   return (
