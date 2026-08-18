@@ -65,6 +65,7 @@ export interface CatalogProduct {
   baseProductName: string;
   productCode: string;
   sampleImage: string;
+  packagingQuantity: number | null;
 }
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {

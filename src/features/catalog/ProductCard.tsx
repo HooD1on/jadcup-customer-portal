@@ -22,6 +22,9 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         <p className="font-mono text-sm text-gray-500">{product.productCode}</p>
         <h2 className="mt-2 text-base font-semibold leading-6 text-gray-900">{product.baseProductName}</h2>
+        {product.packagingQuantity != null && (
+          <p className="mt-1 text-sm text-gray-500">{product.packagingQuantity.toLocaleString()} pcs / carton</p>
+        )}
         <p className="mt-6 text-sm font-medium leading-5 text-gray-500">
           Request a quote to unlock your contract price.
         </p>
