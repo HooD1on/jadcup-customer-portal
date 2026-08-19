@@ -37,7 +37,12 @@ export interface PortalAccountStatusResult {
   rejectionReason?: string;
 }
 
-const API_BASE_URL = (import.meta.env.VITE_PORTAL_API_BASE_URL || 'http://localhost:5020')
+// Docker is only a local development dependency. Production builds always use
+// the API host already used by the deployed Jadcup applications, even if a
+// developer has a localhost override in their shell.
+const API_BASE_URL = (import.meta.env.DEV
+  ? (import.meta.env.VITE_PORTAL_API_BASE_URL || 'http://localhost:5020')
+  : 'https://apijadcup.gradspace.org')
   .replace(/\/$/, '');
 
 function messageText(value: unknown): string | undefined {
