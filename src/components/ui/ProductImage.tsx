@@ -5,7 +5,7 @@ interface ProductImageProps {
   src?: string | null;
   alt: string;
   className?: string;
-  size?: 'sm' | 'md' | 'lg' | 'card';
+  size?: 'sm' | 'md' | 'lg' | 'card' | 'detail';
 }
 
 const sizeClasses = {
@@ -13,6 +13,7 @@ const sizeClasses = {
   md: 'w-16 h-16',
   lg: 'w-24 h-24 md:w-32 md:h-32',
   card: 'h-28 w-full sm:h-32',
+  detail: 'h-56 w-full sm:h-64 sm:w-64',
 };
 
 const iconSizes = {
@@ -20,6 +21,7 @@ const iconSizes = {
   md: 24,
   lg: 32,
   card: 32,
+  detail: 40,
 };
 
 export function ProductImage({ src, alt, className = '', size = 'md' }: ProductImageProps) {

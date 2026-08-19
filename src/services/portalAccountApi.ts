@@ -1,4 +1,4 @@
-import type { CatalogProduct } from '../types';
+import type { CatalogProduct, ProductDetails } from '../types';
 
 export type PortalAccountStatus = 'Pending' | 'Approved' | 'Rejected' | 'Disabled';
 
@@ -139,6 +139,14 @@ export const portalAccountApi = {
   getCatalogProducts(token: string) {
     return request<CatalogProduct[]>(
       '/api/Catalog/GetAllCatalogProducts',
+      { method: 'GET' },
+      token,
+    );
+  },
+
+  getProductDetails(baseProductId: number, token: string) {
+    return request<ProductDetails>(
+      `/api/portal/products/${baseProductId}`,
       { method: 'GET' },
       token,
     );

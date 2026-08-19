@@ -68,6 +68,24 @@ export interface CatalogProduct {
   packagingQuantity: number | null;
 }
 
+export interface ProductDetails {
+  baseProductId: number;
+  baseProductName: string;
+  productCode: string;
+  description: string | null;
+  productTypeName: string | null;
+  imgUrl: string | null;
+  packagingTypeName: string | null;
+  packagingQuantity: number | null;
+  sleeveQty: number | null;
+  sleevePkt: number | null;
+  packagingCategory: string | null;
+  cartonLength: number | null;
+  cartonWidth: number | null;
+  cartonHeight: number | null;
+  grossWeight: number | null;
+}
+
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: 'Pending',
   confirmed: 'Confirmed',
