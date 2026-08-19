@@ -66,6 +66,8 @@ export interface CatalogProduct {
   productCode: string;
   sampleImage: string;
   packagingQuantity: number | null;
+  productTypeId: number | null;
+  productTypeName: string | null;
 }
 
 export interface ProductDetails {
