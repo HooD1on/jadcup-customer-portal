@@ -67,6 +67,10 @@ export function DraftOrderPage() {
   const [rows, setRows] = useState<DraftRow[]>([]);
   const [orderTotal, setOrderTotal] = useState(0);
   const [isUrgent, setIsUrgent] = useState(false);
+  const [custOrderNo, setCustOrderNo] = useState('');
+  const [custOrderNoDraft, setCustOrderNoDraft] = useState<string>();
+  const [custOrderNoSaving, setCustOrderNoSaving] = useState(false);
+  const [custOrderNoError, setCustOrderNoError] = useState<string>();
   const [regenerating, setRegenerating] = useState(false);
   const [regenerateError, setRegenerateError] = useState<string>();
   const [savingItemId, setSavingItemId] = useState<string>();
@@ -84,6 +88,7 @@ export function DraftOrderPage() {
     setRows(buildRows(state));
     setOrderTotal(state.order.totalPrice);
     setIsUrgent(false);
+    setCustOrderNo(state.order.custOrderNo ?? '');
   }, [location.state]);
 
   const handleRegenerate = async () => {
@@ -164,12 +169,39 @@ export function DraftOrderPage() {
     const next = !isUrgent;
     setIsUrgent(next);
     try {
-      const result = await ordersApi.updateUrgentFlag(data.order.orderId, next, session.token);
+      const result = await ordersApi.updateUrgentFlag(data.order.orderId, { isUrgent: next }, session.token);
       setIsUrgent(result.isUrgent);
       setOrderTotal(result.orderTotalPrice);
     } catch (err) {
       setIsUrgent(!next);
       setRegenerateError(err instanceof PortalApiError ? err.message : t('Something went wrong.', '出错了。'));
+    }
+  };
+
+  const saveCustOrderNo = async () => {
+    if (!data || !session?.token || custOrderNoDraft === undefined) return;
+    const value = custOrderNoDraft.trim();
+    if (value === custOrderNo) {
+      setCustOrderNoDraft(undefined);
+      return;
+    }
+
+    setCustOrderNoSaving(true);
+    setCustOrderNoError(undefined);
+    try {
+      // isUrgent 每次都要带上当前值一起传——后端这个字段不是可选的,不传等于把它改回 false。
+      const result = await ordersApi.updateUrgentFlag(
+        data.order.orderId,
+        { isUrgent, custOrderNo: value },
+        session.token,
+      );
+      setCustOrderNo(result.custOrderNo ?? '');
+      setOrderTotal(result.orderTotalPrice);
+      setCustOrderNoDraft(undefined);
+    } catch (err) {
+      setCustOrderNoError(err instanceof PortalApiError ? err.message : t('Something went wrong.', '出错了。'));
+    } finally {
+      setCustOrderNoSaving(false);
     }
   };
 
@@ -267,9 +299,27 @@ export function DraftOrderPage() {
               {t('Draft', '草稿')}
             </span>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 mb-3">
             {t('Review and adjust before submitting for review.', '提交审核之前，请先检查并调整以下内容。')}
           </p>
+          <div className="max-w-xs">
+            <label className="block text-xs text-gray-500 mb-1" htmlFor="cust-order-no">
+              {t('Your Reference (optional)', '您的参考号（选填）')}
+            </label>
+            <input
+              id="cust-order-no"
+              type="text"
+              placeholder={t('e.g. your PO number', '例如：您的采购单号')}
+              disabled={custOrderNoSaving}
+              value={custOrderNoDraft ?? custOrderNo}
+              onChange={(e) => setCustOrderNoDraft(e.target.value)}
+              onBlur={saveCustOrderNo}
+              className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-(--radius-button) focus:ring-2 focus:ring-jade-500 focus:border-jade-500 outline-none disabled:bg-gray-100"
+            />
+            {custOrderNoError && (
+              <p className="text-xs text-red-600 mt-1">{custOrderNoError}</p>
+            )}
+          </div>
         </div>
       </div>
 

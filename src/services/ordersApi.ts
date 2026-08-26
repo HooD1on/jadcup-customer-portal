@@ -44,6 +44,7 @@ export interface UpdateOrderItemResult {
 
 export interface UpdateUrgentFlagResult {
   isUrgent: boolean;
+  custOrderNo: string | null;
   orderTotalPrice: number;
 }
 
@@ -183,10 +184,10 @@ export const ordersApi = {
     }, token);
   },
 
-  updateUrgentFlag(orderId: string, isUrgent: boolean, token: string) {
+  updateUrgentFlag(orderId: string, changes: { isUrgent: boolean; custOrderNo?: string }, token: string) {
     return request<UpdateUrgentFlagResult>(`/api/orders/${orderId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ isUrgent }),
+      body: JSON.stringify(changes),
     }, token);
   },
 

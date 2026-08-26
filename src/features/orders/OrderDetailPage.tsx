@@ -223,8 +223,8 @@ export function OrderDetailPage() {
             <p className="text-sm text-gray-500">{t('Your Reference', '您的参考号')}: {order.custOrderNo}</p>
           )}
         </div>
-        <Button variant="outline" onClick={() => setReorderModalOpen(true)}>
-          <RefreshCcw size={15} /> {t('Reorder', '再次订购')}
+        <Button variant="primary" size="lg" onClick={() => setReorderModalOpen(true)}>
+          <RefreshCcw size={17} /> {t('Reorder', '再次订购')}
         </Button>
       </div>
 
