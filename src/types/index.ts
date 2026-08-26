@@ -25,6 +25,7 @@ export interface OrderSummary {
   requiredDate: string;
   deliveryDate: string | null;
   status: OrderStatus;
+  isDraft: boolean;
   totalPrice: number;
   priceInclGst: number;
   itemCount: number;

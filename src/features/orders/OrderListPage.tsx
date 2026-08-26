@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Filter, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { PageShell } from '../../components/layout/PageShell';
@@ -6,10 +6,14 @@ import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ProductImage } from '../../components/ui/ProductImage';
 import { EmptyState } from '../../components/feedback/EmptyState';
-import { mockOrders, orderProductNames } from '../../mocks/data';
+import { ErrorState } from '../../components/feedback/ErrorState';
+import { LoadingState } from '../../components/feedback/LoadingState';
+import { ordersApi } from '../../services/ordersApi';
+import { PortalApiError } from '../../services/portalAccountApi';
 import { formatCurrency, formatDate } from '../../lib/format';
-import { ORDER_STATUS_LABELS } from '../../types';
+import { ORDER_STATUS_LABELS, type OrderSummary } from '../../types';
 import { useLanguage } from '../language/LanguageContext';
+import { useAuth } from '../auth/AuthContext';
 
 const PAGE_SIZE = 5;
 
@@ -21,11 +25,18 @@ const statusLabelsZh: Record<string, string> = {
 export function OrderListPage() {
   const { language, t } = useLanguage();
   const locale = language === 'zh' ? 'zh-CN' : 'en-NZ';
+  const { session } = useAuth();
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
+  const [reloadKey, setReloadKey] = useState(0);
   const statusOptions: { value: string; label: string }[] = [
     { value: '', label: t('All Statuses', '全部状态') },
     ...Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => ({
@@ -34,25 +45,41 @@ export function OrderListPage() {
     })),
   ];
 
-  const filtered = useMemo(() => {
-    return mockOrders.filter((o) => {
-      if (search) {
-        const q = search.toLowerCase();
-        const matchesOrder =
-          o.orderNo.toLowerCase().includes(q) ||
-          (o.custOrderNo?.toLowerCase().includes(q) ?? false);
-        const matchesProduct = orderProductNames[o.orderId]?.includes(q) ?? false;
-        if (!matchesOrder && !matchesProduct) return false;
-      }
-      if (statusFilter && o.status !== statusFilter) return false;
-      if (dateFrom && o.orderDate < dateFrom) return false;
-      if (dateTo && o.orderDate > dateTo) return false;
-      return true;
-    });
-  }, [search, statusFilter, dateFrom, dateTo]);
+  // 搜索框敲字不直接触发请求,等用户停下来 400ms 之后再真正发出去,避免每敲一个字打一次接口。
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  useEffect(() => {
+    if (!session?.token) return;
+    let cancelled = false;
+
+    setLoading(true);
+    setError(undefined);
+    ordersApi.getOrders({
+      page,
+      pageSize: PAGE_SIZE,
+      keyword: debouncedSearch || undefined,
+      status: statusFilter || undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+    }, session.token)
+      .then((result) => {
+        if (cancelled) return;
+        setOrders(result.items);
+        setTotalCount(result.totalCount);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof PortalApiError ? err.message : t('Something went wrong.', '出错了。'));
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [page, debouncedSearch, statusFilter, dateFrom, dateTo, session?.token, reloadKey, t]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const clearFilters = () => {
     setSearch('');
@@ -68,7 +95,7 @@ export function OrderListPage() {
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('My Orders', '我的订单')}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          {language === 'zh' ? `共 ${filtered.length} 个订单` : `${filtered.length} order${filtered.length !== 1 ? 's' : ''}`}
+          {language === 'zh' ? `共 ${totalCount} 个订单` : `${totalCount} order${totalCount !== 1 ? 's' : ''}`}
         </p>
       </div>
 
@@ -124,7 +151,16 @@ export function OrderListPage() {
       </div>
 
       {/* Content */}
-      {filtered.length === 0 && (
+      {loading && <LoadingState />}
+
+      {!loading && error && (
+        <ErrorState
+          message={error}
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
+      )}
+
+      {!loading && !error && totalCount === 0 && (
         <EmptyState
           title={t('No orders found', '未找到订单')}
           description={t('No orders match your current filters.', '没有订单符合当前筛选条件。')}
@@ -136,7 +172,7 @@ export function OrderListPage() {
         />
       )}
 
-      {filtered.length > 0 && (
+      {!loading && !error && totalCount > 0 && (
         <>
           {/* Desktop table */}
           <div className="hidden md:block bg-white rounded-(--radius-card) shadow-(--shadow-card) overflow-hidden">
@@ -153,7 +189,7 @@ export function OrderListPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {paginated.map((order) => (
+                {orders.map((order) => (
                   <tr key={order.orderId} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
@@ -186,7 +222,7 @@ export function OrderListPage() {
 
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
-            {paginated.map((order) => (
+            {orders.map((order) => (
               <Link
                 key={order.orderId}
                 to={`/orders/${order.orderId}`}

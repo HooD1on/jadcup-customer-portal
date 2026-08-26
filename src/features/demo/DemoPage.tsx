@@ -5,11 +5,13 @@ import { Button } from '../../components/ui/Button';
 import { LoadingState } from '../../components/feedback/LoadingState';
 import { EmptyState } from '../../components/feedback/EmptyState';
 import { ErrorState } from '../../components/feedback/ErrorState';
+import { Modal } from '../../components/ui/Modal';
 
 type DemoView = 'loading' | 'empty' | 'error';
 
 export function DemoPage() {
   const [view, setView] = useState<DemoView>('loading');
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <PageShell>
@@ -51,6 +53,30 @@ export function DemoPage() {
           />
         )}
       </div>
+
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Modal</h2>
+        <Button variant="outline" onClick={() => setModalOpen(true)}>
+          Open Modal
+        </Button>
+      </div>
+
+      <Modal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Confirm Reorder"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button variant="primary" onClick={() => setModalOpen(false)}>Confirm</Button>
+          </>
+        }
+      >
+        <p className="text-sm text-gray-600">
+          This is a preview of the shared Modal component — overlay click, Esc key, and the
+          footer action buttons should all close it.
+        </p>
+      </Modal>
     </PageShell>
   );
 }
