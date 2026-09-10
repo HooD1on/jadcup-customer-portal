@@ -1,4 +1,5 @@
-import { useParams, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   MapPin,
@@ -8,16 +9,21 @@ import {
   Clock,
   Package as PackageIcon,
   FileText,
+  RefreshCcw,
 } from 'lucide-react';
 import { PageShell } from '../../components/layout/PageShell';
 import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ProductImage } from '../../components/ui/ProductImage';
 import { ErrorState } from '../../components/feedback/ErrorState';
-import { mockOrderDetails } from '../../mocks/data';
+import { LoadingState } from '../../components/feedback/LoadingState';
+import { ordersApi, type ReorderResult } from '../../services/ordersApi';
+import { PortalApiError } from '../../services/portalAccountApi';
 import { formatCurrency, formatDate } from '../../lib/format';
 import type { OrderStatus, OrderDetail } from '../../types';
 import { useLanguage } from '../language/LanguageContext';
+import { useAuth } from '../auth/AuthContext';
+import { ReorderPreviewModal } from './ReorderPreviewModal';
 
 const timelineSteps: { status: OrderStatus; label: string; labelZh: string; icon: typeof Clock }[] = [
   { status: 'pending', label: 'Order Placed', labelZh: '订单已提交', icon: FileText },
@@ -130,14 +136,49 @@ export function OrderDetailPage() {
   const { language, t } = useLanguage();
   const locale = language === 'zh' ? 'zh-CN' : 'en-NZ';
   const { orderId } = useParams<{ orderId: string }>();
-  const order: OrderDetail | undefined = orderId ? mockOrderDetails[orderId] : undefined;
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  const [order, setOrder] = useState<OrderDetail>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>();
+  const [reorderModalOpen, setReorderModalOpen] = useState(false);
 
-  if (!order) {
+  const handleReorderConfirmed = (result: ReorderResult, sourceOrderId: string) => {
+    setReorderModalOpen(false);
+    navigate(`/orders/${result.order.orderId}/draft?from=${sourceOrderId}`, { state: result });
+  };
+
+  useEffect(() => {
+    if (!orderId || !session?.token) return;
+    let cancelled = false;
+
+    setLoading(true);
+    setError(undefined);
+    ordersApi.getOrderDetail(orderId, session.token)
+      .then((result) => { if (!cancelled) setOrder(result); })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof PortalApiError ? err.message : t('Something went wrong.', '出错了。'));
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [orderId, session?.token, t]);
+
+  if (loading) {
+    return (
+      <PageShell>
+        <LoadingState />
+      </PageShell>
+    );
+  }
+
+  if (error || !order) {
     return (
       <PageShell>
         <ErrorState
           title={t('Order not found', '未找到订单')}
-          message={t("We couldn't find this order. It may have been removed or the link is incorrect.", '无法找到该订单。订单可能已被移除，或链接有误。')}
+          message={error || t("We couldn't find this order. It may have been removed or the link is incorrect.", '无法找到该订单。订单可能已被移除，或链接有误。')}
         />
         <div className="text-center mt-4">
           <Link to="/orders" className="no-underline">
@@ -171,6 +212,9 @@ export function OrderDetailPage() {
             <p className="text-sm text-gray-500">{t('Your Reference', '您的参考号')}: {order.custOrderNo}</p>
           )}
         </div>
+        <Button variant="primary" size="lg" onClick={() => setReorderModalOpen(true)}>
+          <RefreshCcw size={17} /> {t('Reorder', '再次订购')}
+        </Button>
       </div>
 
       {/* Progress timeline — not shown for cancelled orders */}
@@ -299,6 +343,13 @@ export function OrderDetailPage() {
           </div>
         </div>
       </div>
+
+      <ReorderPreviewModal
+        isOpen={reorderModalOpen}
+        sourceOrderId={order.orderId}
+        onClose={() => setReorderModalOpen(false)}
+        onConfirmed={handleReorderConfirmed}
+      />
     </PageShell>
   );
 }

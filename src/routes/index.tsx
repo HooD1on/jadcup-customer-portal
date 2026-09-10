@@ -8,6 +8,7 @@ import { CatalogPage } from '../features/catalog/CatalogPage';
 import { ProductDetailsPage } from '../features/catalog/ProductDetailsPage';
 import { OrderListPage } from '../features/orders/OrderListPage';
 import { OrderDetailPage } from '../features/orders/OrderDetailPage';
+import { DraftOrderPage } from '../features/orders/DraftOrderPage';
 import { DemoPage } from '../features/demo/DemoPage';
 import { NotFoundPage } from '../features/NotFoundPage';
 import { ApplicationStatusPage } from '../features/auth/ApplicationStatusPage';
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       
       { path: '/orders', element: <OrderListPage /> },
       { path: '/orders/:orderId', element: <OrderDetailPage /> },
+      { path: '/orders/:orderId/draft', element: <DraftOrderPage /> },
       { path: '/_demo', element: <DemoPage /> },
       { path: '/catalog', element: <CatalogPage />},
       { path: '/catalog/products/:baseProductId', element: <ProductDetailsPage /> },
