@@ -1,4 +1,4 @@
-import type { OrderDetail, OrderSummary } from '../types';
+import type { OrderDetail, OrderProduct, OrderSummary } from '../types';
 import { PortalApiError } from './portalAccountApi';
 
 interface TaskResponse<T> {
@@ -35,6 +35,21 @@ export interface OrderItemStatus {
 export interface ReorderResult {
   order: OrderDetail;
   items: OrderItemStatus[];
+}
+
+// 只算不落库——GET /reorder/preview 的返回值,没有 orderId/orderNo 这些要落库才有的字段。
+export interface ReorderPreviewResult {
+  sourceOrderId: string;
+  totalPrice: number;
+  priceInclGst: number;
+  items: OrderItemStatus[];
+  products: OrderProduct[];
+}
+
+export interface ReorderConfirmLine {
+  itemId: string;
+  quantity: number;
+  included: boolean;
 }
 
 export interface UpdateOrderItemResult {
@@ -169,6 +184,24 @@ export const ordersApi = {
     return request<ReorderResult>('/api/orders/reorder', {
       method: 'POST',
       body: JSON.stringify({ sourceOrderId }),
+    }, token);
+  },
+
+  // 只读、不落库——用来在真正创建草稿之前,把当前最新报价先给客户看一眼。
+  reorderPreview(sourceOrderId: string, token: string) {
+    return request<ReorderPreviewResult>(
+      `/api/orders/reorder/preview?sourceOrderId=${encodeURIComponent(sourceOrderId)}`,
+      { method: 'GET' },
+      token,
+    );
+  },
+
+  // 客户在预览里确认/调整过的选择通过 lines 带过去;不传就是全部按源订单默认值
+  // (数量照抄源订单、included 由后端按报价是否有效自动算)。
+  reorderConfirm(sourceOrderId: string, lines: ReorderConfirmLine[] | undefined, token: string) {
+    return request<ReorderResult>('/api/orders/reorder/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ sourceOrderId, lines }),
     }, token);
   },
 

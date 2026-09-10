@@ -17,13 +17,13 @@ import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ProductImage } from '../../components/ui/ProductImage';
 import { ErrorState } from '../../components/feedback/ErrorState';
 import { LoadingState } from '../../components/feedback/LoadingState';
-import { Modal } from '../../components/ui/Modal';
-import { ordersApi } from '../../services/ordersApi';
+import { ordersApi, type ReorderResult } from '../../services/ordersApi';
 import { PortalApiError } from '../../services/portalAccountApi';
 import { formatCurrency, formatDate } from '../../lib/format';
 import type { OrderStatus, OrderDetail } from '../../types';
 import { useLanguage } from '../language/LanguageContext';
 import { useAuth } from '../auth/AuthContext';
+import { ReorderPreviewModal } from './ReorderPreviewModal';
 
 const timelineSteps: { status: OrderStatus; label: string; labelZh: string; icon: typeof Clock }[] = [
   { status: 'pending', label: 'Order Placed', labelZh: '订单已提交', icon: FileText },
@@ -142,21 +142,10 @@ export function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
   const [reorderModalOpen, setReorderModalOpen] = useState(false);
-  const [reordering, setReordering] = useState(false);
-  const [reorderError, setReorderError] = useState<string>();
 
-  const handleReorder = async () => {
-    if (!order || !session?.token) return;
-    setReordering(true);
-    setReorderError(undefined);
-    try {
-      const result = await ordersApi.reorder(order.orderId, session.token);
-      navigate(`/orders/${result.order.orderId}/draft?from=${order.orderId}`, { state: result });
-    } catch (err) {
-      setReorderError(err instanceof PortalApiError ? err.message : t('Something went wrong.', '出错了。'));
-    } finally {
-      setReordering(false);
-    }
+  const handleReorderConfirmed = (result: ReorderResult, sourceOrderId: string) => {
+    setReorderModalOpen(false);
+    navigate(`/orders/${result.order.orderId}/draft?from=${sourceOrderId}`, { state: result });
   };
 
   useEffect(() => {
@@ -355,31 +344,12 @@ export function OrderDetailPage() {
         </div>
       </div>
 
-      <Modal
+      <ReorderPreviewModal
         isOpen={reorderModalOpen}
-        onClose={() => { if (!reordering) setReorderModalOpen(false); }}
-        title={t('Reorder this order?', '再次订购这笔订单？')}
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setReorderModalOpen(false)} disabled={reordering}>
-              {t('Cancel', '取消')}
-            </Button>
-            <Button variant="primary" onClick={handleReorder} disabled={reordering}>
-              {reordering ? t('Creating draft...', '正在生成草稿……') : t('Reorder', '确认再次订购')}
-            </Button>
-          </>
-        }
-      >
-        <p className="text-sm text-gray-600">
-          {t(
-            "We'll create a new draft order with the same products, priced at each item's current quotation. Items without a valid quotation will be locked and excluded — you'll be able to review everything before submitting.",
-            '我们会创建一份包含相同商品的新草稿订单，价格按当前有效报价计算。没有有效报价的商品会被锁定并排除在外——提交之前你可以先检查确认。',
-          )}
-        </p>
-        {reorderError && (
-          <p className="text-sm text-red-600 mt-3">{reorderError}</p>
-        )}
-      </Modal>
+        sourceOrderId={order.orderId}
+        onClose={() => setReorderModalOpen(false)}
+        onConfirmed={handleReorderConfirmed}
+      />
     </PageShell>
   );
 }
